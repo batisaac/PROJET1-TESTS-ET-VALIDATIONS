@@ -1,7 +1,22 @@
-bin
-include
-lib
-.Python
-tests/
+# Environnements virtuels
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Tests et couverture
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Performance
+perf.html
+
+# OS
+.DS_Store
+
+# Local
+.env
 .envrc
-__pycache__
