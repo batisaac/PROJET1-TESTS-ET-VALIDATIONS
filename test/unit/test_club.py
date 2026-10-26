@@ -1,0 +1,27 @@
+"""Tests unitaires de la recherche d'un club."""
+
+from club import find_by_email
+
+
+def test_find_by_email_trouve_le_club():
+    clubs = [{'email': 'a@club.com'}, {'email': 'b@club.com'}]
+
+    assert find_by_email(clubs, 'b@club.com') == {'email': 'b@club.com'}
+
+
+def test_find_by_email_inconnu_retourne_none():
+    clubs = [{'email': 'a@club.com'}]
+
+    assert find_by_email(clubs, 'inconnu@club.com') is None
+
+
+def test_find_by_email_ignore_les_espaces_autour():
+    clubs = [{'email': 'a@club.com'}]
+
+    assert find_by_email(clubs, '  a@club.com  ') == {'email': 'a@club.com'}
+
+
+def test_find_by_email_vide_retourne_none():
+    clubs = [{'email': 'a@club.com'}]
+
+    assert find_by_email(clubs, '') is None

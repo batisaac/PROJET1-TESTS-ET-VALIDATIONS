@@ -1,6 +1,7 @@
 import pytest
 
 import server
+from repository import load_clubs, load_competitions
 
 
 @pytest.fixture
@@ -18,6 +19,6 @@ def donnees_reinitialisees():
     L'application garde ses donnees en memoire (variables globales) : sans ce
     rechargement, un achat effectue dans un test modifierait les suivants.
     """
-    server.clubs = server.loadClubs()
-    server.competitions = server.loadCompetitions()
+    server.clubs = load_clubs()
+    server.competitions = load_competitions()
     yield

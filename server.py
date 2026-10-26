@@ -1,24 +1,14 @@
-import json
 from flask import Flask,render_template,request,redirect,flash,url_for
 
-
-def loadClubs():
-    with open('clubs.json') as c:
-         listOfClubs = json.load(c)['clubs']
-         return listOfClubs
-
-
-def loadCompetitions():
-    with open('competitions.json') as comps:
-         listOfCompetitions = json.load(comps)['competitions']
-         return listOfCompetitions
+from club import find_by_email
+from repository import load_clubs, load_competitions
 
 
 app = Flask(__name__)
 app.secret_key = 'something_special'
 
-competitions = loadCompetitions()
-clubs = loadClubs()
+competitions = load_competitions()
+clubs = load_clubs()
 
 @app.route('/')
 def index():
@@ -26,8 +16,7 @@ def index():
 
 @app.route('/showSummary',methods=['POST'])
 def showSummary():
-    email = request.form.get('email', '').strip()
-    club = next((c for c in clubs if c['email'] == email), None)
+    club = find_by_email(clubs, request.form.get('email', ''))
     if club is None:
         flash('Sorry, that email is not registered.')
         return render_template('index.html'), 200
