@@ -11,6 +11,12 @@ CLUB_RICHE = {'points': '100'}
 COMPETITION_GRANDE = {'numberOfPlaces': '100'}
 CLUB_PAUVRE = {'points': '4'}
 COMPETITION_COMPLETE = {'numberOfPlaces': '0'}
+CLUB_ZERO = {'points': '0'}
+CLUB_ONZE = {'points': '11'}
+CLUB_DOUZE = {'points': '12'}
+COMPETITION_UNE = {'numberOfPlaces': '1'}
+COMPETITION_QUATRE = {'numberOfPlaces': '4'}
+COMPETITION_DOUZE = {'numberOfPlaces': '12'}
 
 
 def test_parse_places_entier_valide():
@@ -78,3 +84,64 @@ def test_validate_refuse_concours_complet():
 ])
 def test_confirmation_message_indique_le_nombre_de_places(places, attendu):
     assert attendu in confirmation_message(places)
+
+
+@pytest.mark.parametrize('saisie, attendu', [
+    ('+3', 3),
+    ('0', 0),
+    ('-5', -5),
+    ('', None),
+    ('   ', None),
+    ('3.0', None),
+    ('3 places', None),
+    ('12\n', 12),
+])
+def test_parse_places_cas_limites(saisie, attendu):
+    assert parse_places(saisie) == attendu
+
+
+@pytest.mark.parametrize('club, competition, places, attendu', [
+    (CLUB_PAUVRE, COMPETITION_COMPLETE, 0, 'at least one place'),
+    (CLUB_PAUVRE, COMPETITION_COMPLETE, 13, 'competition is full'),
+    (CLUB_PAUVRE, COMPETITION_PETITE, 13, 'not enough places'),
+    (CLUB_PAUVRE, COMPETITION_GRANDE, 13, 'more than 12 places'),
+    (CLUB_PAUVRE, COMPETITION_GRANDE, 5, 'do not have enough points'),
+    (CLUB_PAUVRE, COMPETITION_GRANDE, 4, None),
+])
+def test_validate_respecte_l_ordre_des_regles(club, competition, places,
+                                              attendu):
+    message = validate_purchase(club, competition, places)
+
+    if attendu is None:
+        assert message is None
+    else:
+        assert attendu in message
+
+
+@pytest.mark.parametrize('club, competition, places', [
+    (CLUB_RICHE, COMPETITION_UNE, 1),
+    (CLUB_DOUZE, COMPETITION_DOUZE, 12),
+    (CLUB_PAUVRE, COMPETITION_QUATRE, 4),
+])
+def test_validate_accepte_les_bornes(club, competition, places):
+    assert validate_purchase(club, competition, places) is None
+
+
+def test_validate_refuse_un_point_de_moins():
+    message = validate_purchase(CLUB_ONZE, COMPETITION, 12)
+
+    assert 'do not have enough points' in message
+
+
+def test_validate_refuse_un_club_sans_point():
+    message = validate_purchase(CLUB_ZERO, COMPETITION, 1)
+
+    assert 'do not have enough points' in message
+
+
+@pytest.mark.parametrize('places, attendu', [
+    (1, 'Great-booking complete! You have booked 1 place.'),
+    (12, 'Great-booking complete! You have booked 12 places.'),
+])
+def test_confirmation_message_est_exact(places, attendu):
+    assert confirmation_message(places) == attendu
