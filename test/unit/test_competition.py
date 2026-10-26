@@ -37,4 +37,3 @@ def test_upcoming_garde_une_date_invalide():
     resultat = upcoming(competitions, maintenant=datetime(2026, 1, 1))
 
     assert resultat == competitions
-

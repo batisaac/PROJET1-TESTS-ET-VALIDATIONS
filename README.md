@@ -77,5 +77,12 @@ Merci !
    
  6. Flake8 Report 
     
+    Commande : `flake8 .` (configuration dans `setup.cfg`, environnement `.venv` exclu)
+
+    ```
+    (aucune sortie)
+    ```
+
+    Résultat : **0 erreur**.
 
 

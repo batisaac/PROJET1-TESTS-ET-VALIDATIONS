@@ -43,11 +43,13 @@ def refuser_sans_session():
 def competitions_a_venir():
     return upcoming(competitions)
 
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/showSummary',methods=['POST'])
+
+@app.route('/showSummary', methods=['POST'])
 def showSummary():
     club = find_by_email(clubs, request.form.get('email', ''))
     if club is None:
@@ -62,7 +64,7 @@ def showSummary():
 
 
 @app.route('/book/<competition>/<club>')
-def book(competition,club):
+def book(competition, club):
     clubSession = club_de_session()
     if clubSession is None:
         return refuser_sans_session()
@@ -82,7 +84,7 @@ def book(competition,club):
     )
 
 
-@app.route('/purchasePlaces',methods=['POST'])
+@app.route('/purchasePlaces', methods=['POST'])
 def purchasePlaces():
     clubSession = club_de_session()
     if clubSession is None:
@@ -116,7 +118,11 @@ def purchasePlaces():
     save_clubs(clubs)
     save_competitions(competitions)
     flash(confirmation_message(placesRequired))
-    return render_template('welcome.html', club=foundClub, competitions=competitions)
+    return render_template(
+        'welcome.html',
+        club=foundClub,
+        competitions=competitions_a_venir(),
+    )
 
 
 # TODO: Add route for points display
