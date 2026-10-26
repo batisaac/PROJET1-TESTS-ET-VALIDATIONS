@@ -1,6 +1,6 @@
 # Rapport de performances — GUDLFT (phase 2)
 
-> Version 1.0 — 2026-10-26
+> Version 1.1 — 2026-10-26
 > Auteur : Isaac Batoua (`batisaac`)
 > Dépôt : <https://github.com/batisaac/PROJET1-TESTS-ET-VALIDATIONS>
 > Outil : Locust 2.47.0
@@ -103,6 +103,7 @@ Aucune requête n'a dépassé les seuils, y compris au 100e centile de l'échant
 | 3 | Mesure de 30 s et 6 utilisateurs | Échantillon volontairement conforme au guide ; ce n'est pas un test de charge longue durée |
 | 4 | Tâche d'achat qui épuise les points/places | Après quelques achats, les requêtes suivantes sont refusées (HTTP 200) ; le temps de réponse reste mesuré |
 | 5 | Données réelles modifiées par les achats | Restauration obligatoire (`git checkout -- clubs.json competitions.json`) |
+| 6 | Locust ne charge pas les ressources CDN (CSS, polices, Bootstrap) | Les temps mesurent le serveur Flask, pas le rendu navigateur ni le téléchargement des CDN |
 
 ## 9. Conclusion
 

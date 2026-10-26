@@ -1,14 +1,13 @@
 # Rapport de test — GUDLFT
 
-> Version 1.11 — 2026-10-26
+> Version 1.12 — 2026-10-26
 > Auteur : Isaac Batoua (`batisaac`)
 > Dépôt : <https://github.com/batisaac/PROJET1-TESTS-ET-VALIDATIONS>
-> Branche courante : `main` @ `305cf77`
+> Branche : `main` — code métier inchangé depuis `305cf77`, interface refondue
 
-**État d'avancement : phases 1 et 2 terminées — 25 anomalies corrigées sur 26 (1 atténuée),
-F1 et F2 livrées, 117 tests verts.**
-Les sections marquées *(à compléter)* le seront au fur et à mesure ; ce document ne
-contient aucun résultat non mesuré.
+**État d'avancement : phases 1 et 2 terminées, interface refondue — 25 anomalies corrigées
+sur 26 (1 atténuée), F1 et F2 livrées, 118 tests verts.**
+Ce document ne contient aucun résultat non mesuré.
 
 ---
 
@@ -45,19 +44,25 @@ apportées, la couverture de code, la conformité Flake8 et la phase 2.
 
 - Création de comptes, mots de passe, récupération d'identifiants.
 - Administration des compétitions et attribution des points.
-- Internationalisation, accessibilité avancée.
+- Internationalisation, certification d'accessibilité par un auditeur externe.
+- Pages 404/403 personnalisées : elles dépendent de `server.py`, laissé inchangé.
 
 ### 2.3 Composants testés
 
 | Élément | Rôle |
 |---|---|
 | `server.py` | Routes : `/`, `/showSummary`, `/book/<competition>/<club>`, `/purchasePlaces`, `/logout` |
+| `templates/base.html` | Gabarit commun : en-tête, navigation, flashs, pied de page |
+| `templates/_macros.html` | Cartes de compétition, flashs, calcul du rang |
+| `templates/_flash.html` | Catégorisation et rendu des messages flash |
 | `templates/index.html` | Formulaire de connexion |
 | `templates/welcome.html` | Tableau de bord du club |
 | `templates/booking.html` | Formulaire d'achat |
 | `templates/points.html` | Tableau public des points |
+| `static/css/gudlft.css` | Jetons de design, composants et responsive |
+| `static/js/gudlft.js` | Compteur de places et tri progressif, sans logique métier |
 | `clubs.json` | Clubs (`name`, `email`, `points`) |
-| `competitions.json` | Compétitions (`name`, `date`, `numberOfPlaces`) |
+| `competitions.json` | Compétitions (`name`, `date`, `numberOfPlaces`, `initialPlaces`) |
 
 Le projet utilise des fichiers JSON à la place d'un SGBD (choix imposé pour ce POC).
 
@@ -77,6 +82,9 @@ Le projet utilise des fichiers JSON à la place d'un SGBD (choix imposé pour ce
 | pytest-cov / coverage | 7.1.0 / 7.16.2 |
 | flake8 | 7.4.1 |
 | Locust | 2.47.0 (mesures de charge phase 2, 6 utilisateurs) |
+| Interface | Bootstrap 5.3.3, Bootstrap Icons 1.11.3, Tailwind Play CDN 3.4.17 |
+| Polices | Barlow Condensed, Inter, JetBrains Mono (Google Fonts) |
+| Contrôle de rendu | Google Chrome headless (1440 px et 390 px), axe-core 4.10.2 |
 
 Installation et lancement :
 
@@ -139,8 +147,9 @@ def donnees_reinitialisees():
 ### 4.5 Branches Git
 
 `<type>/<nom-descriptif>`, une branche par groupe cohérent d'anomalies ou par
-fonctionnalité. `main` reste la source de vérité ; la branche `QA` sera créée depuis `main`
-en fin de projet et **ne sera jamais fusionnée dans `main`**.
+fonctionnalité. La refonte visuelle a sa branche dédiée `feature/refonte-interface`,
+fusionnée en avance rapide. `main` reste la source de vérité ; la branche `QA` est créée
+depuis `main` en fin de projet et **n'est jamais fusionnée dans `main`**.
 
 ---
 
@@ -179,6 +188,7 @@ en fin de projet et **ne sera jamais fusionnée dans `main`**.
 | HTML valide (réservation, accueil) | T-I30, T-I31 | **écrit, VERT** |
 | Tableau public sans connexion (phase 2) | T-I32 | **écrit, VERT** |
 | Contenu du tableau public (phase 2) | T-I33 | **écrit, VERT** |
+| Interface refondue servie et composants présents | T-I34 | **écrit, VERT** |
 | Parcours complet (phase 2) | T-F01 à T-F03 | **écrit, VERT** |
 | Performance (phase 2) | Locust, `rapport-de-performances.md` | **mesuré** |
 
@@ -360,7 +370,7 @@ Trois dossiers de tests sont actifs à ce stade :
 - `test/integration/test_booking_url.py` (4 tests, T-I05 à T-I07b) ;
 - `test/integration/test_purchase.py` (16 cas, T-I08 à T-I22) ;
 - `test/integration/test_securite.py` (6 tests, T-I23 à T-I28) ;
-- `test/integration/test_interface.py` (3 tests, T-I29 à T-I31) ;
+- `test/integration/test_interface.py` (4 tests, T-I29 à T-I31 et T-I34) ;
 - `test/integration/test_points_public.py` (2 tests, T-I32 et T-I33) ;
 - `test/unit/` : `test_club.py`, `test_competition.py`, `test_config.py`,
   `test_repository.py` et `test_booking.py` (79 tests, T-U01 à T-U59) ;
@@ -376,8 +386,8 @@ python -m pytest -q
 
 ```text
 ........................................................................ [ 61%]
-.............................................                            [100%]
-117 passed in 6.90s
+..............................................                           [100%]
+118 passed in 5.08s
 ```
 
 **Preuve TDD (test de connexion, avant correction) :**
@@ -434,6 +444,7 @@ pytest échouait au chargement avec `ModuleNotFoundError: No module named 'repos
 | T-I31 | `test_page_accueil_associe_le_label_et_le_champ` | Intégration | `id="email"` (B24) | VERT |
 | T-I32 | `test_tableau_public_accessible_sans_connexion` | Intégration (happy) | `GET /points` → 200 sans session (F1) | VERT |
 | T-I33 | `test_tableau_public_affiche_tous_les_clubs_et_leurs_points` | Intégration (happy) | 3 clubs + points, aucun email exposé (F1) | VERT |
+| T-I34 | `test_feuille_de_style_est_servie_et_referencee` | Intégration | CSS 200, chargé par les pages, formulaires/tableau présents | VERT |
 | T-U01 | `test_load_clubs_lit_les_trois_clubs` | Unitaire | 3 clubs, premier = Simply Lift | VERT |
 | T-U02 | `test_load_competitions_lit_les_deux_competitions` | Unitaire | 2 compétitions, première = Spring Festival | VERT |
 | T-U03 | `test_load_clubs_fonctionne_depuis_un_autre_repertoire` | Unitaire | chargement indépendant du répertoire courant (B18) | VERT |
@@ -497,16 +508,16 @@ pytest échouait au chargement avec `ModuleNotFoundError: No module named 'repos
 | T-F02 | `test_parcours_limite_de_douze_places_par_achat` | Fonctionnel | 13 refusé, 12 accepté, puis 1 accepté jusqu'à 0 point | VERT |
 | T-F03 | `test_parcours_stock_epuise_puis_refus` | Fonctionnel | dernier place achetée puis « competition is full » | VERT |
 
-Répartition : **79 unitaires / 35 intégration / 3 fonctionnels**, soit un ratio de
-**2,08 test unitaire** par test d'intégration ou fonctionnel (objectif du guide : environ 2×).
+Répartition : **79 unitaires / 36 intégration / 3 fonctionnels**, soit un ratio de
+**2,03 tests unitaires** par test d'intégration ou fonctionnel (objectif du guide : environ 2×).
 
 ---
 
-## 9. Backlog de tests (non écrits)
+## 9. Points hors périmètre
 
-Tous les tests identifiés sont désormais écrits. Les points restants ne sont pas des tests
-manquants mais des limites assumées (§14) : B22 (listes globales), absence de protection
-CSRF et mesure de charge hors pytest.
+Tous les tests identifiés sont écrits : il ne reste aucun backlog de test. Les points
+restants sont des limites assumées (§14) — B22 (listes globales), absence de protection
+CSRF, pages 404/403 laissées à Flask et audit d'accessibilité externe.
 
 Le test de charge est réalisé (`locustfile.py`, 6 utilisateurs) ; il reste hors de pytest
 car il nécessite un serveur en fonctionnement. Voir `rapport-de-performances.md`.
@@ -852,15 +863,47 @@ Les tests unitaires sont passés de 32 à **79 cas** (+47), avec 29 nouvelles fo
 bornes stock/quota/points, messages exacts, recherche de club (casse, espaces, `None`),
 bornes de dates de `upcoming`, génération de clé, et robustesse de `repository` (fichier
 absent, JSON corrompu, clé racine absente, Unicode, écriture atomique, remplacement).
-Le ratio atteint **2,08** test unitaire par test d'intégration/fonctionnel.
+Le ratio atteint **2,08** test unitaire par test d'intégration/fonctionnel à l'issue de ce
+renforcement. L'ajout ultérieur de T-I34 le porte à **2,03**.
 
-### 10.17 Reste à faire
+### 10.17 Branche `feature/refonte-interface`
+
+Refonte visuelle complète sans modification de `server.py`, des noms de routes, des
+variables Jinja, des champs de formulaire (`name`, `id`, `action`) ni des textes flash.
+Les 117 tests antérieurs restent verts ; T-I34 vérifie que le CSS est servi et référencé.
+
+- Gabarit `templates/base.html` : en-tête sombre, navigation, saut de contenu, zone de
+  flashs, pied de page ; `_macros.html` et `_flash.html` factorisent les composants.
+- Les quatre pages sont refondues : connexion centrée, tableau de bord avec scoreboard et
+  cartes de compétition, réservation avec rappel du solde, classement public.
+- `static/css/gudlft.css` centralise les jetons (`:root`), la direction « plateau de
+  compétition » (craie, charbon, rouge, acier), les composants, les états vides et le
+  responsive desktop-first. Contrastes AA vérifiés sur les couples de couleurs utilisés.
+- Cartes avec jauge native `<progress>` : `initialPlaces` (25 et 13) fournit la capacité
+  initiale ; les états disponible, limite, critique et complet sont annoncés par un texte
+  et une icône, jamais par la couleur seule.
+- Bootstrap 5.3.3 fournit la grille, les boutons, formulaires, alertes, tableaux et la
+  navbar ; Tailwind Play CDN 3.4.17 n'est utilisé que pour des micro-utilitaires `tw-`
+  (préfixe `tw-`, Preflight désactivé). Le CSS maison est chargé en dernier.
+- `static/js/gudlft.js` se limite au compteur de places et au tri progressif du tableau ;
+  aucune règle métier. Sans JavaScript, les formulaires et le tableau restent utilisables.
+- Accessibilité : `lang="fr"`, un seul `h1` par page, libellés associés, focus visible
+  3 px, cibles ≥ 44 px, lien d'évitement, `aria-live`, icônes `aria-hidden`,
+  tableau défilant focusable et `prefers-reduced-motion`.
+- Contrôle de rendu Chrome headless (1440 px et 390 px) : aucun débordement horizontal,
+  aucune cible interactive sous 44 px, polices et CDN chargés, aucune erreur JavaScript.
+  Parcours vérifiés : connexion valide, email inconnu, tableau de bord, réservation, points.
+- Audit axe-core 4.10.2 : **0 violation WCAG** sur les 9 vues contrôlées (connexion,
+  erreur de connexion, tableau de bord, réservation et points, en desktop et mobile).
+
+### 10.18 Points hors périmètre
 
 | Élément | Statut |
 |---|---|
 | B22 | atténué par la fixture, non corrigé (limite §14) |
-| Tests « fichier JSON absent / corrompu » | **écrits** (T-U51 à T-U54) |
 | Protection CSRF | non prévue (limite §14) |
+| Pages 404/403 personnalisées | impossible sans toucher `server.py` (limite §14) |
+| Score Lighthouse | non mesuré ; audit axe-core 4.10.2 sans violation et contrôle DOM à la place (limite §14) |
 
 ---
 
@@ -885,7 +928,7 @@ repository.py       21      0   100%
 server.py           80      0   100%
 ----------------------------------------------
 TOTAL              149      0   100%
-117 passed in 6.53s
+118 passed in 8.35s
 ```
 
 | Fichier | % | Lignes non couvertes |
@@ -969,8 +1012,8 @@ Détail des mesures : `rapport-de-performances.md`.
 | 4 | Couverture applicative de 100 % | Mesure d'exécution, pas de conformité métier |
 | 5 | `coverage` mesure l'exécution, pas la qualité des assertions | Chaque fonctionnalité testée en happy + sad path |
 | 6 | Locust mesure le serveur de développement Flask, sur la boucle locale, pendant 30 s | Résultats optimistes, mais très en dessous des seuils (5 s / 2 s) ; détails et limites dans `rapport-de-performances.md` |
-| 7 | Le client de test Flask ne teste pas le JavaScript (ex. blocage de `abc` par `<input type="number">`) | D'où l'importance de la validation serveur (T-I12) |
-| 8 | Les tests unitaires ont d'abord été écrits au fil des branches, puis renforcés en fin de projet | Répartition finale : 79 unitaires / 35 intégration / 3 fonctionnels (ratio 2,08) |
+| 7 | Le client de test Flask ne teste pas le JavaScript (ex. blocage de `abc` par `<input type="number">`) | Validation serveur conservée (T-I12) ; compteur de places contrôlé manuellement dans Chrome |
+| 8 | Les tests unitaires ont d'abord été écrits au fil des branches, puis renforcés en fin de projet | Répartition finale : 79 unitaires / 36 intégration / 3 fonctionnels (ratio 2,03) |
 | 9 | `clubs.json` et `competitions.json` sont écrits séparément (pas de transaction commune) | Un arrêt entre les deux écritures peut désynchroniser points et stock |
 | 10 | Les tests de persistance écrivent dans les vrais fichiers JSON (restaurés par la fixture) | Ne pas lancer deux `pytest` en parallèle sur le même dossier |
 | 11 | Aucune protection CSRF sur les formulaires | Un site tiers pourrait soumettre un achat à la place d'un utilisateur connecté |
@@ -978,13 +1021,18 @@ Détail des mesures : `rapport-de-performances.md`.
 | 13 | Le filtrage des compétitions utilise l'heure locale du serveur | Un fuseau différent peut décaler la limite passé/futur |
 | 14 | B22 non corrigé : listes globales chargées au démarrage | La fixture masque le problème dans les tests ; un rechargement à chaud n'est pas prévu |
 | 15 | Test de charge de courte durée (30 s, 6 utilisateurs) sur données locales | Suffisant pour vérifier les seuils, pas pour dimensionner une production |
+| 16 | Bootstrap, Bootstrap Icons, Tailwind et Google Fonts sont chargés par CDN | Le rendu dépend du réseau ; en production, héberger ou versionner ces ressources |
+| 17 | Tailwind Play CDN est un outil de développement | Ne pas l'utiliser tel quel en production ; compiler Tailwind pour un déploiement réel |
+| 18 | Pages 404/403 laissées aux pages Flask par défaut | Non personnalisables sans modifier `server.py`, volontairement inchangé |
+| 19 | Accessibilité : WCAG AA vérifiée par axe-core 4.10.2 (0 violation sur 9 vues) et contrastes calculés | Pas de certification ni de score Lighthouse |
+| 20 | Catégorie des flashs déduite des messages anglais du serveur | Un nouveau message non reconnu tombe en catégorie « information » |
 
 ---
 
 ## 15. Conclusion
 
-**État actuel** : **117 tests écrits, 117 verts** (79 unitaires, 35 intégration,
-3 fonctionnels), soit un ratio de **2,08** test unitaire par test d'intégration/fonctionnel.
+**État actuel** : **118 tests écrits, 118 verts** (79 unitaires, 36 intégration,
+3 fonctionnels), soit un ratio de **2,03** tests unitaires par test d'intégration/fonctionnel.
 Anomalies corrigées : **25 sur 26** — connexion (B1, B2, B2b), chemins JSON (B18),
 page de réservation (B3, B4, B5, B5bis), formulaire d'achat (B6, B7, B8, B9),
 toutes les règles métier (B10 à B16), persistance (B17), sécurité (B19, B20, B21),
@@ -1001,6 +1049,8 @@ Points d'attention confirmés par les mesures :
 - les achats sont persistés, la session est obligatoire et liée au club, `/logout` ferme la
   session et les compétitions passées sont masquées ;
 - le tableau public répond sans connexion et n'expose pas les emails ;
+- l'interface est responsive, accessible au clavier, sans dépendance JavaScript pour les
+  parcours, et les tests existants sont préservés (T-I34) ;
 - performance mesurée : **467 ms** au maximum pour la liste des compétitions (seuil 5 s)
   et **82 ms** pour l'achat (seuil 2 s), 0 échec sur 93 requêtes ;
 - aucune protection CSRF n'est en place et B22 reste une limite documentée (§14).
@@ -1043,10 +1093,17 @@ git checkout -- clubs.json competitions.json
 ├── clubs.json
 ├── competitions.json
 ├── templates/
+│   ├── base.html               gabarit commun (en-tête, nav, flashs, footer)
+│   ├── _macros.html            cartes, flashs, rang
+│   ├── _flash.html             rendu des messages flash
 │   ├── index.html              connexion + messages flash + lien public
 │   ├── welcome.html            tableau de bord (compétitions à venir)
 │   ├── booking.html            formulaire d'achat (min/max)
 │   └── points.html             tableau public des points
+├── static/
+│   ├── css/gudlft.css          jetons, composants, responsive
+│   ├── js/gudlft.js            compteur de places, tri (sans métier)
+│   └── favicon.svg             icône GUDLFT
 ├── reproduction_bugs.py        reproduction des anomalies
 ├── locustfile.py               test de charge (6 utilisateurs)
 ├── rapport-de-test.md
@@ -1067,7 +1124,7 @@ git checkout -- clubs.json competitions.json
     │   ├── test_booking_url.py     (4 tests — VERT)
     │   ├── test_purchase.py        (16 tests — VERT)
     │   ├── test_securite.py        (6 tests — VERT)
-    │   ├── test_interface.py       (3 tests — VERT)
+    │   ├── test_interface.py       (4 tests — VERT)
     │   └── test_points_public.py   (2 tests — VERT)
     └── fonctionnel/
         ├── __init__.py

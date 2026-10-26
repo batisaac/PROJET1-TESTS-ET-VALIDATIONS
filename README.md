@@ -68,6 +68,24 @@ Merci !
     * competitions.json - list of competitions
     * clubs.json - list of clubs with relevant information. You can look here to see what email addresses the app will accept for login.
 
+### Interface (refonte v1.12)
+
+L'interface est refondue sans modification de `server.py`. `templates/base.html`
+mutualise l'en-tête, la navigation, les flashs et le pied de page ; les composants sont
+dans `_macros.html` et `_flash.html`.
+
+- `static/css/gudlft.css` : jetons `:root`, direction « plateau de compétition »,
+  composants, responsive et états vides.
+- `static/js/gudlft.js` : compteur de places et tri progressif, sans logique métier ;
+  les parcours restent utilisables sans JavaScript.
+- Bootstrap 5.3.3 (grille, composants, alertes), Bootstrap Icons 1.11.3 et Tailwind
+  Play CDN 3.4.17 en micro-utilitaires `tw-` (Preflight désactivé). Google Fonts :
+  Barlow Condensed, Inter et JetBrains Mono.
+- Accessibilité : `lang="fr"`, un `h1` par page, focus visible, cibles ≥ 44 px,
+  lien d'évitement, `aria-live`, contrastes AA et `prefers-reduced-motion`.
+  Audit axe-core 4.10.2 : 0 violation sur 9 vues desktop/mobile.
+- `competitions.json` contient `initialPlaces` pour calculer la jauge de remplissage.
+
 5. Testing
 
     You are free to use whatever testing framework you like-the main thing is that you can show what tests you are using.
@@ -90,8 +108,8 @@ Merci !
     | `test/integration/` | routes Flask avec le client de test |
     | `test/fonctionnel/` | parcours complets de bout en bout |
 
-    Résultat actuel : **117 tests verts** (79 unitaires / 35 intégration / 3 fonctionnels,
-    ratio unitaire **2,08**), couverture applicative **100 %**.
+    Résultat actuel : **118 tests verts** (79 unitaires / 36 intégration / 3 fonctionnels,
+    ratio unitaire **2,03**), couverture applicative **100 %**.
     Le test de charge Locust est décrit plus bas.
 
  6. Flake8 Report 
@@ -126,6 +144,8 @@ Merci !
     | pytest / pytest-cov | 9.1.1 / 7.1.0 |
     | Flake8 | 7.4.1 (limite 99, `.venv` exclu) |
     | Locust | 2.47.0 |
+    | Interface | Bootstrap 5.3.3, Bootstrap Icons 1.11.3, Tailwind Play CDN 3.4.17 |
+    | Polices | Barlow Condensed, Inter, JetBrains Mono (Google Fonts) |
 
     - Installer les dépendances : `.\.venv\Scripts\python.exe -m pip install -r requirements.txt`
     - Lancer le serveur : `.\.venv\Scripts\python.exe -m flask --app server run`
