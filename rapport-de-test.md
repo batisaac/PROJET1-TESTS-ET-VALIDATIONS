@@ -1,12 +1,12 @@
 # Rapport de test — GUDLFT
 
-> Version 1.10 — 2026-10-26
+> Version 1.11 — 2026-10-26
 > Auteur : Isaac Batoua (`batisaac`)
 > Dépôt : <https://github.com/batisaac/PROJET1-TESTS-ET-VALIDATIONS>
-> Branche courante : `main` @ `1900cb6`
+> Branche courante : `main` @ `305cf77`
 
 **État d'avancement : phases 1 et 2 terminées — 25 anomalies corrigées sur 26 (1 atténuée),
-F1 et F2 livrées, 70 tests verts.**
+F1 et F2 livrées, 117 tests verts.**
 Les sections marquées *(à compléter)* le seront au fur et à mesure ; ce document ne
 contient aucun résultat non mesuré.
 
@@ -76,7 +76,7 @@ Le projet utilise des fichiers JSON à la place d'un SGBD (choix imposé pour ce
 | pytest | 9.1.1 |
 | pytest-cov / coverage | 7.1.0 / 7.16.2 |
 | flake8 | 7.4.1 |
-| Locust | 2.47.0 (installé, non encore utilisé) |
+| Locust | 2.47.0 (mesures de charge phase 2, 6 utilisateurs) |
 
 Installation et lancement :
 
@@ -138,8 +138,9 @@ def donnees_reinitialisees():
 
 ### 4.5 Branches Git
 
-`<type>/<nom-descriptif>`, une branche par anomalie. `main` reste la source de vérité ;
-la branche `QA` sera créée depuis `main` en fin de projet et **ne sera jamais fusionnée dans `main`**.
+`<type>/<nom-descriptif>`, une branche par groupe cohérent d'anomalies ou par
+fonctionnalité. `main` reste la source de vérité ; la branche `QA` sera créée depuis `main`
+en fin de projet et **ne sera jamais fusionnée dans `main`**.
 
 ---
 
@@ -362,31 +363,21 @@ Trois dossiers de tests sont actifs à ce stade :
 - `test/integration/test_interface.py` (3 tests, T-I29 à T-I31) ;
 - `test/integration/test_points_public.py` (2 tests, T-I32 et T-I33) ;
 - `test/unit/` : `test_club.py`, `test_competition.py`, `test_config.py`,
-  `test_repository.py` et `test_booking.py` (32 tests, T-U01 à T-U30) ;
+  `test_repository.py` et `test_booking.py` (79 tests, T-U01 à T-U59) ;
 - `test/fonctionnel/test_parcours_complet.py` (3 parcours, T-F01 à T-F03).
 
 ### 8.1 Exécution
 
 ```cmd
-python -m pytest -v
+python -m pytest -q
 ```
 
 **Résultat actuel :**
 
 ```text
-test/integration/test_booking_url.py ....
-test/integration/test_interface.py ...
-test/integration/test_login.py ....
-test/integration/test_points_public.py ..
-test/integration/test_purchase.py ................
-test/integration/test_securite.py ......
-test/unit/test_booking.py ...............
-test/unit/test_club.py ......
-test/unit/test_competition.py ....
-test/unit/test_config.py ..
-test/unit/test_repository.py .....
-test/fonctionnel/test_parcours_complet.py ...
-============================ 70 passed in 4.40s ==============================
+........................................................................ [ 61%]
+.............................................                            [100%]
+117 passed in 6.90s
 ```
 
 **Preuve TDD (test de connexion, avant correction) :**
@@ -473,20 +464,49 @@ pytest échouait au chargement avec `ModuleNotFoundError: No module named 'repos
 | T-U28 | `test_secret_key_generee_si_variable_absente` | Unitaire | 64 caractères aléatoires (B19) | VERT |
 | T-U29 | `test_upcoming_ne_garde_que_les_competitions_a_venir` | Unitaire | passée exclue, future gardée (B23) | VERT |
 | T-U30 | `test_upcoming_garde_une_date_invalide` | Unitaire | date illisible conservée (B23) | VERT |
+| T-U31 | `test_parse_places_cas_limites` (8 cas) | Unitaire | `+3`, `0`, `-5`, vide, espaces, `3.0`, texte, retour ligne | VERT |
+| T-U32 | `test_validate_respecte_l_ordre_des_regles` (6 cas) | Unitaire | priorité quantité → complet → stock → quota → points | VERT |
+| T-U33 | `test_validate_accepte_les_bornes` (3 cas) | Unitaire | limites exactes stock / quota / points acceptées | VERT |
+| T-U34 | `test_validate_refuse_un_point_de_moins` | Unitaire | 12 places avec 11 points → message points | VERT |
+| T-U35 | `test_validate_refuse_un_club_sans_point` | Unitaire | club à 0 point → message points | VERT |
+| T-U36 | `test_confirmation_message_est_exact` (2 cas) | Unitaire | message complet exact pour 1 et 12 places | VERT |
+| T-U37 | `test_find_by_email_ignore_les_tabulations` | Unitaire | `\t` et `\n` éliminés par `strip()` | VERT |
+| T-U38 | `test_find_by_email_none_retourne_none` | Unitaire | `None` → `None` | VERT |
+| T-U39 | `test_find_by_email_espaces_seuls_retourne_none` | Unitaire | `'   '` → `None` | VERT |
+| T-U40 | `test_find_by_email_est_sensible_a_la_casse` | Unitaire | correspondance exacte, casse significative | VERT |
+| T-U41 | `test_find_by_name_vide_retourne_none` | Unitaire | nom vide → `None` | VERT |
+| T-U42 | `test_upcoming_garde_la_date_egale_a_maintenant` | Unitaire | borne incluse (date = maintenant) | VERT |
+| T-U43 | `test_upcoming_exclut_une_seconde_avant` | Unitaire | borne exclue (une seconde avant) | VERT |
+| T-U44 | `test_upcoming_liste_vide` | Unitaire | liste vide → liste vide | VERT |
+| T-U45 | `test_upcoming_garde_une_competition_sans_date` | Unitaire | clé `date` absente → conservée | VERT |
+| T-U46 | `test_upcoming_conserve_l_ordre` | Unitaire | ordre d'origine préservé | VERT |
+| T-U47 | `test_upcoming_garde_les_formats_invalides` (2 cas) | Unitaire | date seule et format français conservés | VERT |
+| T-U48 | `test_secret_key_generee_si_variable_vide` | Unitaire | `SECRET_KEY=''` → clé générée de 64 caractères | VERT |
+| T-U49 | `test_secret_key_generee_est_hexadecimale` | Unitaire | clé générée composée de `0-9a-f` | VERT |
+| T-U50 | `test_secret_key_generee_change_a_chaque_appel` | Unitaire | deux appels → deux clés distinctes | VERT |
+| T-U51 | `test_load_clubs_fichier_absent` | Unitaire | `FileNotFoundError` | VERT |
+| T-U52 | `test_load_competitions_fichier_absent` | Unitaire | `FileNotFoundError` | VERT |
+| T-U53 | `test_load_json_corrompu` (2 cas) | Unitaire | `JSONDecodeError` pour clubs et compétitions | VERT |
+| T-U54 | `test_load_json_sans_cle_attendue` (2 cas) | Unitaire | `KeyError` si clé racine absente | VERT |
+| T-U55 | `test_save_clubs_conserve_les_accents` | Unitaire | aller-retour UTF-8 (`Équipe Café`) | VERT |
+| T-U56 | `test_save_competitions_conserve_tous_les_champs` | Unitaire | nom, date et places conservés | VERT |
+| T-U57 | `test_save_ne_laisse_pas_de_fichier_temporaire` | Unitaire | aucun `.tmp` résiduel après écriture atomique | VERT |
+| T-U58 | `test_save_liste_vide_puis_relecture` | Unitaire | liste vide écrite puis relue | VERT |
+| T-U59 | `test_save_remplace_le_contenu_existant` | Unitaire | ancien contenu remplacé, pas concaténé | VERT |
 | T-F01 | `test_parcours_connexion_achat_et_consultation_publique` | Fonctionnel | connexion → réservation → achat → déconnexion → `/points` à jour | VERT |
 | T-F02 | `test_parcours_limite_de_douze_places_par_achat` | Fonctionnel | 13 refusé, 12 accepté, puis 1 accepté jusqu'à 0 point | VERT |
 | T-F03 | `test_parcours_stock_epuise_puis_refus` | Fonctionnel | dernier place achetée puis « competition is full » | VERT |
 
-Répartition : **32 unitaires / 35 intégration / 3 fonctionnels**.
+Répartition : **79 unitaires / 35 intégration / 3 fonctionnels**, soit un ratio de
+**2,08 test unitaire** par test d'intégration ou fonctionnel (objectif du guide : environ 2×).
 
 ---
 
 ## 9. Backlog de tests (non écrits)
 
-| Fichier | Tests prévus |
-|---|---|
-| `test/unit/test_repository.py` | fichier absent, JSON corrompu |
-| Tous les autres fichiers | — (couvert) |
+Tous les tests identifiés sont désormais écrits. Les points restants ne sont pas des tests
+manquants mais des limites assumées (§14) : B22 (listes globales), absence de protection
+CSRF et mesure de charge hors pytest.
 
 Le test de charge est réalisé (`locustfile.py`, 6 utilisateurs) ; il reste hors de pytest
 car il nécessite un serveur en fonctionnement. Voir `rapport-de-performances.md`.
@@ -825,12 +845,21 @@ achat). Mesure de 30 s : **93 requêtes, 0 échec**, maximum **467 ms** pour la 
 compétitions (seuil 5 s) et **82 ms** pour l'achat (seuil 2 s). Détail et limites dans
 `rapport-de-performances.md`.
 
-### 10.16 Reste à faire
+### 10.16 Branche `test/renforcement-unitaire`
+
+Les tests unitaires sont passés de 32 à **79 cas** (+47), avec 29 nouvelles fonctions
+(T-U31 à T-U59) : cas limites de `parse_places`, ordre des cinq règles de validation,
+bornes stock/quota/points, messages exacts, recherche de club (casse, espaces, `None`),
+bornes de dates de `upcoming`, génération de clé, et robustesse de `repository` (fichier
+absent, JSON corrompu, clé racine absente, Unicode, écriture atomique, remplacement).
+Le ratio atteint **2,08** test unitaire par test d'intégration/fonctionnel.
+
+### 10.17 Reste à faire
 
 | Élément | Statut |
 |---|---|
 | B22 | atténué par la fixture, non corrigé (limite §14) |
-| Tests « fichier JSON absent / corrompu » | non écrits (backlog §9) |
+| Tests « fichier JSON absent / corrompu » | **écrits** (T-U51 à T-U54) |
 | Protection CSRF | non prévue (limite §14) |
 
 ---
@@ -856,7 +885,7 @@ repository.py       21      0   100%
 server.py           80      0   100%
 ----------------------------------------------
 TOTAL              149      0   100%
-70 passed in 4.40s
+117 passed in 6.53s
 ```
 
 | Fichier | % | Lignes non couvertes |
@@ -941,7 +970,7 @@ Détail des mesures : `rapport-de-performances.md`.
 | 5 | `coverage` mesure l'exécution, pas la qualité des assertions | Chaque fonctionnalité testée en happy + sad path |
 | 6 | Locust mesure le serveur de développement Flask, sur la boucle locale, pendant 30 s | Résultats optimistes, mais très en dessous des seuils (5 s / 2 s) ; détails et limites dans `rapport-de-performances.md` |
 | 7 | Le client de test Flask ne teste pas le JavaScript (ex. blocage de `abc` par `<input type="number">`) | D'où l'importance de la validation serveur (T-I12) |
-| 8 | Les tests unitaires sont écrits au fil des branches, pas en bloc final | Répartition actuelle : 32 unitaires / 35 intégration / 3 fonctionnels |
+| 8 | Les tests unitaires ont d'abord été écrits au fil des branches, puis renforcés en fin de projet | Répartition finale : 79 unitaires / 35 intégration / 3 fonctionnels (ratio 2,08) |
 | 9 | `clubs.json` et `competitions.json` sont écrits séparément (pas de transaction commune) | Un arrêt entre les deux écritures peut désynchroniser points et stock |
 | 10 | Les tests de persistance écrivent dans les vrais fichiers JSON (restaurés par la fixture) | Ne pas lancer deux `pytest` en parallèle sur le même dossier |
 | 11 | Aucune protection CSRF sur les formulaires | Un site tiers pourrait soumettre un achat à la place d'un utilisateur connecté |
@@ -954,8 +983,8 @@ Détail des mesures : `rapport-de-performances.md`.
 
 ## 15. Conclusion
 
-**État actuel** : **70 tests écrits, 70 verts** (32 unitaires, 35 intégration,
-3 fonctionnels).
+**État actuel** : **117 tests écrits, 117 verts** (79 unitaires, 35 intégration,
+3 fonctionnels), soit un ratio de **2,08** test unitaire par test d'intégration/fonctionnel.
 Anomalies corrigées : **25 sur 26** — connexion (B1, B2, B2b), chemins JSON (B18),
 page de réservation (B3, B4, B5, B5bis), formulaire d'achat (B6, B7, B8, B9),
 toutes les règles métier (B10 à B16), persistance (B17), sécurité (B19, B20, B21),
@@ -1027,11 +1056,11 @@ git checkout -- clubs.json competitions.json
     ├── conftest.py             fixtures client, connecte, réinitialisation
     ├── unit/
     │   ├── __init__.py
-    │   ├── test_booking.py         (15 tests — VERT)
-    │   ├── test_club.py            (6 tests — VERT)
-    │   ├── test_competition.py     (4 tests — VERT)
-    │   ├── test_config.py          (2 tests — VERT)
-    │   └── test_repository.py      (5 tests — VERT)
+    │   ├── test_booking.py         (36 tests — VERT)
+    │   ├── test_club.py            (11 tests — VERT)
+    │   ├── test_competition.py     (11 tests — VERT)
+    │   ├── test_config.py          (5 tests — VERT)
+    │   └── test_repository.py      (16 tests — VERT)
     ├── integration/
     │   ├── __init__.py
     │   ├── test_login.py           (4 tests — VERT)

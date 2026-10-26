@@ -90,7 +90,8 @@ Merci !
     | `test/integration/` | routes Flask avec le client de test |
     | `test/fonctionnel/` | parcours complets de bout en bout |
 
-    Résultat actuel : **70 tests verts**, couverture applicative **100 %**.
+    Résultat actuel : **117 tests verts** (79 unitaires / 35 intégration / 3 fonctionnels,
+    ratio unitaire **2,08**), couverture applicative **100 %**.
     Le test de charge Locust est décrit plus bas.
 
  6. Flake8 Report 
@@ -143,8 +144,9 @@ Merci !
 
 9. Conventions de développement
 
-    - Une branche par anomalie ou fonctionnalité : `<type>/<nom-descriptif>`
-      (`bug/`, `refactor/`, `chore/`, `feature/`, `test/`, `perf/`, `docs/`).
+    - Une branche par groupe cohérent d'anomalies ou par fonctionnalité :
+      `<type>/<nom-descriptif>` (`bug/`, `refactor/`, `chore/`, `feature/`, `test/`,
+      `perf/`, `docs/`).
     - TDD : écrire le test (rouge), écrire le minimum de code (vert), puis refactorer.
     - Commits : `type: description (Bxx)` quand un identifiant d'anomalie existe.
     - `main` reste la source de vérité ; chaque branche est poussée puis fusionnée en
@@ -180,6 +182,6 @@ Merci !
 
     **Où sont les preuves ?**
     `rapport-de-test.md`, `rapport-de-performances.md`, `reproduction_bugs.py` et l'historique
-    Git (une branche par anomalie).
+    Git (branches par groupe d'anomalies).
 
 
