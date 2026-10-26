@@ -1,0 +1,18 @@
+{% from '_macros.html' import alerte with context %}
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class="flash-zone" aria-live="polite" data-testid="flash-zone">
+            {% for message in messages %}
+                {% if 'Great-booking' in message %}
+                    {{ alerte(message, 'success') }}
+                {% elif 'full' in message or 'not enough places' in message or 'more than' in message or 'at least one' in message %}
+                    {{ alerte(message, 'warning') }}
+                {% elif 'Sorry' in message %}
+                    {{ alerte(message, 'error') }}
+                {% else %}
+                    {{ alerte(message, 'info') }}
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}

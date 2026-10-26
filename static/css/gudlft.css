@@ -1,0 +1,1058 @@
+@charset "UTF-8";
+
+/* ==========================================================================
+   1. Jetons de design — « Le plateau de compétition »
+   ========================================================================== */
+:root {
+    --craie: #f4f1ea;
+    --surface: #ffffff;
+    --charbon: #14171a;
+    --acier: #5b6470;
+    --acier-clair: #8a919b;
+    --rouge: #d7263d;
+    --rouge-fonce: #b01d30;
+    --rouge-texte: #b01d30;
+    --bleu: #1f5fbf;
+    --jaune: #f2b705;
+    --vert: #1e9e5a;
+    --ligne: #dad4c7;
+    --ligne-forte: #c9c1b1;
+
+    --font-titre: "Barlow Condensed", "Arial Narrow", sans-serif;
+    --font-texte: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "JetBrains Mono", "Consolas", monospace;
+
+    --rayon-s: 6px;
+    --rayon-m: 12px;
+    --rayon-l: 20px;
+    --rayon-pill: 999px;
+
+    --ombre-1: 0 1px 2px rgba(20, 23, 26, .06), 0 8px 24px rgba(20, 23, 26, .05);
+    --ombre-2: 0 12px 32px rgba(20, 23, 26, .12);
+
+    --espace-1: .25rem;
+    --espace-2: .5rem;
+    --espace-3: 1rem;
+    --espace-4: 1.5rem;
+    --espace-5: 2rem;
+    --espace-6: 3rem;
+    --transition: 180ms ease;
+}
+
+/* ==========================================================================
+   2. Base et accessibilité
+   ========================================================================== */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    background: var(--craie);
+    color: var(--charbon);
+    font-family: var(--font-texte);
+    font-size: 1rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3 {
+    margin: 0;
+    font-family: var(--font-titre);
+    font-weight: 700;
+    line-height: .95;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+}
+
+h1 {
+    font-size: clamp(2.6rem, 5vw, 4.5rem);
+}
+
+h2 {
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+}
+
+h3 {
+    font-size: 1.5rem;
+}
+
+p {
+    margin-top: 0;
+}
+
+a {
+    color: var(--bleu);
+    text-decoration-thickness: 1px;
+    text-underline-offset: .18em;
+}
+
+a:hover {
+    color: var(--rouge-texte);
+}
+
+::selection {
+    background: var(--rouge);
+    color: #fff;
+}
+
+:focus-visible {
+    outline: 3px solid var(--bleu);
+    outline-offset: 3px;
+}
+
+.site-header :focus-visible {
+    outline-color: #fff;
+}
+
+.skip-link {
+    position: absolute;
+    top: -4rem;
+    left: 1rem;
+    z-index: 1200;
+    padding: .75rem 1rem;
+    border-radius: var(--rayon-s);
+    background: var(--charbon);
+    color: #fff;
+    font-weight: 700;
+    transition: top var(--transition);
+}
+
+.skip-link:focus {
+    top: 1rem;
+    color: #fff;
+}
+
+.container {
+    width: min(100% - 2rem, 1180px);
+    max-width: 1180px;
+}
+
+/* ==========================================================================
+   3. En-tête et navigation
+   ========================================================================== */
+.site-header {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: var(--charbon);
+    color: #fff;
+}
+
+.site-header__pattern {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+        repeating-linear-gradient(135deg, rgba(255, 255, 255, .035) 0 1px, transparent 1px 18px),
+        linear-gradient(90deg, transparent 0 74%, rgba(215, 38, 61, .18) 74% 100%);
+}
+
+.site-header__inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    min-height: 84px;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--espace-4);
+    padding-block: var(--espace-3);
+}
+
+.brand {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-rows: auto auto;
+    column-gap: .8rem;
+    align-items: center;
+    color: #fff;
+    text-decoration: none;
+}
+
+.brand:hover {
+    color: #fff;
+}
+
+.brand__mark {
+    position: relative;
+    display: block;
+    grid-row: 1 / span 2;
+    width: 2.8rem;
+    height: 2.8rem;
+    border: 3px solid var(--rouge);
+    border-radius: 50%;
+}
+
+.brand__mark::after {
+    content: "";
+    position: absolute;
+    inset: 7px;
+    border: 1px solid rgba(255, 255, 255, .55);
+    border-radius: 50%;
+}
+
+.brand__name {
+    font-family: var(--font-titre);
+    font-size: 2.1rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: .05em;
+}
+
+.brand__baseline {
+    color: rgba(255, 255, 255, .68);
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .17em;
+    line-height: 1.2;
+    text-transform: uppercase;
+}
+
+.site-nav__list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .15rem 1.35rem;
+}
+
+.site-nav__link {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    padding: .4rem 0;
+    border-bottom: 2px solid transparent;
+    color: rgba(255, 255, 255, .82);
+    font-size: .76rem;
+    font-weight: 700;
+    letter-spacing: .11em;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color var(--transition), border-color var(--transition);
+}
+
+.site-nav__link:hover,
+.site-nav__link:focus-visible,
+.site-nav__link[aria-current="page"] {
+    border-bottom-color: var(--rouge);
+    color: #fff;
+}
+
+.site-nav__link--logout {
+    color: #fff;
+}
+
+/* ==========================================================================
+   4. Structure des pages
+   ========================================================================== */
+.site-main {
+    padding-block: clamp(2rem, 5vw, 4rem);
+}
+
+.site-main:focus {
+    outline: none;
+}
+
+.page-head {
+    max-width: 68ch;
+    margin-bottom: var(--espace-5);
+}
+
+.page-title {
+    margin-bottom: var(--espace-2);
+}
+
+.page-intro {
+    margin-bottom: 0;
+    color: var(--acier);
+    font-size: 1.05rem;
+}
+
+.eyebrow {
+    margin-bottom: .45rem;
+    color: var(--rouge-texte);
+    font-family: var(--font-mono);
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+}
+
+.section-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--espace-3);
+    margin-bottom: var(--espace-4);
+}
+
+.section-title {
+    margin: 0;
+}
+
+.breadcrumb-line {
+    margin-bottom: var(--espace-4);
+    color: var(--acier);
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.breadcrumb-line a {
+    color: var(--acier);
+}
+
+.breadcrumb-line a:hover {
+    color: var(--rouge-texte);
+}
+
+/* ==========================================================================
+   5. Flashs et alertes
+   ========================================================================== */
+.flash-zone {
+    display: grid;
+    gap: .75rem;
+    margin-bottom: var(--espace-4);
+}
+
+.flash {
+    display: flex;
+    align-items: flex-start;
+    gap: .8rem;
+    margin: 0;
+    padding: .9rem 1rem;
+    border: 1px solid transparent;
+    border-left: 4px solid;
+    border-radius: var(--rayon-s);
+}
+
+.flash--success {
+    border-color: #bfe3cc;
+    border-left-color: var(--vert);
+    background: #edf8f1;
+    color: #14532d;
+}
+
+.flash--error {
+    border-color: #f3c2c8;
+    border-left-color: var(--rouge);
+    background: #fdecee;
+    color: #7f1424;
+}
+
+.flash--warning {
+    border-color: #e9d48a;
+    border-left-color: #d9a600;
+    background: #fff8e1;
+    color: #5a4300;
+}
+
+.flash--info {
+    border-color: #bfd3ee;
+    border-left-color: var(--bleu);
+    background: #eaf1fb;
+    color: #173f7a;
+}
+
+.flash__icon {
+    flex: 0 0 auto;
+    font-size: 1.15rem;
+    line-height: 1.3;
+}
+
+.flash__content {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.flash__title {
+    display: block;
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.flash__message {
+    display: block;
+    font-size: .94rem;
+    line-height: 1.5;
+}
+
+.flash .btn-close {
+    box-sizing: border-box;
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    margin: -.1rem 0 0 .25rem;
+    padding: 0;
+    background-size: .9rem;
+    background-position: center;
+}
+
+/* ==========================================================================
+   6. Connexion
+   ========================================================================== */
+.auth-wrap {
+    position: relative;
+    min-height: clamp(420px, 58vh, 640px);
+    padding-block: var(--espace-3);
+    background:
+        radial-gradient(circle at 12% 18%, rgba(215, 38, 61, .07), transparent 30%),
+        radial-gradient(circle at 88% 82%, rgba(31, 95, 191, .06), transparent 32%);
+}
+
+.auth-card {
+    max-width: 540px;
+    margin-inline: auto;
+    padding: clamp(1.5rem, 4vw, 2.6rem);
+    border: 1px solid var(--ligne);
+    border-top: 4px solid var(--rouge);
+    border-radius: var(--rayon-m);
+    background: var(--surface);
+    box-shadow: var(--ombre-2);
+}
+
+.auth-card h1 {
+    margin-bottom: var(--espace-3);
+    font-size: clamp(2.2rem, 5vw, 3.4rem);
+}
+
+.auth-intro {
+    margin-bottom: var(--espace-4);
+    color: var(--acier);
+}
+
+.auth-alt {
+    margin: var(--espace-3) 0 0;
+    color: var(--acier);
+    font-size: .88rem;
+    text-align: center;
+}
+
+/* ==========================================================================
+   7. Formulaires et boutons
+   ========================================================================== */
+.form-label {
+    margin-bottom: .45rem;
+    color: var(--acier);
+    font-family: var(--font-mono);
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.form-control {
+    min-height: 48px;
+    border-color: var(--ligne-forte);
+    border-radius: var(--rayon-s);
+    background: #fff;
+    color: var(--charbon);
+}
+
+.form-control:focus {
+    border-color: var(--bleu);
+    box-shadow: 0 0 0 3px rgba(31, 95, 191, .18);
+}
+
+.form-text {
+    color: var(--acier);
+}
+
+.btn-brand {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: var(--rouge);
+    --bs-btn-border-color: var(--rouge);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--rouge-fonce);
+    --bs-btn-hover-border-color: var(--rouge-fonce);
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: var(--rouge-fonce);
+    --bs-btn-active-border-color: var(--rouge-fonce);
+    --bs-btn-disabled-color: #fff;
+    --bs-btn-disabled-bg: var(--acier-clair);
+    --bs-btn-disabled-border-color: var(--acier-clair);
+    min-height: 48px;
+    border-radius: var(--rayon-s);
+    font-weight: 700;
+    letter-spacing: .02em;
+    transition: background-color var(--transition), border-color var(--transition), transform var(--transition);
+}
+
+.btn-brand:not(:disabled):not(.disabled):hover {
+    transform: translateY(-1px);
+}
+
+.btn-ghost {
+    min-height: 44px;
+    border: 1px solid var(--ligne-forte);
+    border-radius: var(--rayon-s);
+    background: transparent;
+    color: var(--charbon);
+    font-weight: 600;
+}
+
+.btn-ghost:hover {
+    border-color: var(--charbon);
+    background: var(--charbon);
+    color: #fff;
+}
+
+/* ==========================================================================
+   8. Tableau de bord
+   ========================================================================== */
+.welcome-line {
+    margin-top: var(--espace-3);
+    margin-bottom: 0;
+    color: var(--acier);
+    font-size: 1rem;
+}
+
+.scoreboard {
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid rgba(215, 38, 61, .75);
+    border-top: 4px solid var(--rouge);
+    border-radius: var(--rayon-m);
+    background: var(--charbon);
+    color: #fff;
+    box-shadow: var(--ombre-2);
+}
+
+.scoreboard::after {
+    content: "";
+    position: absolute;
+    right: -2.5rem;
+    bottom: -3rem;
+    width: 9rem;
+    height: 9rem;
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.scoreboard__label {
+    position: relative;
+    z-index: 1;
+    margin: 0 0 .25rem;
+    color: rgba(255, 255, 255, .68);
+    font-family: var(--font-mono);
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+}
+
+.scoreboard__value {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    color: #fff;
+    font-family: var(--font-titre);
+    font-size: clamp(4rem, 9vw, 6.5rem);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    letter-spacing: .02em;
+    line-height: .85;
+}
+
+.scoreboard__hint {
+    position: relative;
+    z-index: 1;
+    margin: .5rem 0 0;
+    color: rgba(255, 255, 255, .58);
+    font-family: var(--font-mono);
+    font-size: .7rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.scoreboard--compact {
+    padding: 1rem 1.2rem;
+}
+
+.scoreboard--compact .scoreboard__value {
+    font-size: 3.2rem;
+}
+
+/* ==========================================================================
+   9. Cartes de compétition et jauge
+   ========================================================================== */
+.competition-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: var(--espace-3);
+    padding: 1.35rem;
+    border: 1px solid var(--ligne);
+    border-radius: var(--rayon-m);
+    background: var(--surface);
+    box-shadow: var(--ombre-1);
+    transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+}
+
+.competition-card:hover,
+.competition-card:focus-within {
+    border-color: var(--ligne-forte);
+    box-shadow: var(--ombre-2);
+    transform: translateY(-3px);
+}
+
+.competition-card--complet {
+    background: #faf8f2;
+}
+
+.competition-card__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--espace-3);
+}
+
+.competition-card__title {
+    margin: 0;
+    font-size: 1.65rem;
+}
+
+.competition-card__date {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin: 0;
+    color: var(--acier);
+    font-family: var(--font-mono);
+    font-size: .78rem;
+    line-height: 1.4;
+}
+
+.status-chip {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: .35rem;
+    padding: .35rem .6rem;
+    border-radius: var(--rayon-pill);
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    line-height: 1.25;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.status-chip--disponible {
+    background: rgba(30, 158, 90, .13);
+    color: #11663a;
+}
+
+.status-chip--limite {
+    background: rgba(242, 183, 5, .22);
+    color: #5a4300;
+}
+
+.status-chip--critique,
+.status-chip--complet {
+    background: rgba(215, 38, 61, .12);
+    color: #8f1528;
+}
+
+.competition-card__gauge-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: .5rem;
+    margin-bottom: .4rem;
+    color: var(--acier);
+    font-family: var(--font-mono);
+    font-size: .68rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.competition-card__gauge-value {
+    color: var(--charbon);
+    font-weight: 700;
+}
+
+.gauge {
+    display: block;
+    width: 100%;
+    height: 10px;
+    overflow: hidden;
+    border: 0;
+    border-radius: var(--rayon-pill);
+    background: var(--ligne);
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.gauge::-webkit-progress-bar {
+    border-radius: var(--rayon-pill);
+    background: var(--ligne);
+}
+
+.gauge::-webkit-progress-value {
+    border-radius: var(--rayon-pill);
+    background: var(--vert);
+    transition: width var(--transition);
+}
+
+.gauge::-moz-progress-bar {
+    border-radius: var(--rayon-pill);
+    background: var(--vert);
+}
+
+.gauge--limite::-webkit-progress-value {
+    background: var(--jaune);
+}
+
+.gauge--limite::-moz-progress-bar {
+    background: var(--jaune);
+}
+
+.gauge--critique::-webkit-progress-value,
+.gauge--complet::-webkit-progress-value {
+    background: var(--rouge);
+}
+
+.gauge--critique::-moz-progress-bar,
+.gauge--complet::-moz-progress-bar {
+    background: var(--rouge);
+}
+
+.competition-card__action {
+    margin-top: auto;
+}
+
+.competition-card__reason {
+    margin: .5rem 0 0;
+    color: var(--acier);
+    font-size: .82rem;
+    text-align: center;
+}
+
+/* ==========================================================================
+   10. Réservation
+   ========================================================================== */
+.panel {
+    padding: 1.5rem;
+    border: 1px solid var(--ligne);
+    border-radius: var(--rayon-m);
+    background: var(--surface);
+    box-shadow: var(--ombre-1);
+}
+
+.booking-summary h2 {
+    margin-bottom: var(--espace-3);
+    font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.data-line {
+    display: inline-block;
+    margin-bottom: var(--espace-4);
+    padding: .5rem .75rem;
+    border-left: 3px solid var(--rouge);
+    background: var(--craie);
+    color: var(--charbon);
+    font-family: var(--font-mono);
+    font-size: .86rem;
+    font-weight: 700;
+}
+
+.booking-counter {
+    margin: var(--espace-3) 0;
+    padding: .65rem .85rem;
+    border-left: 3px solid var(--bleu);
+    background: var(--craie);
+    color: var(--charbon);
+    font-size: .88rem;
+    line-height: 1.45;
+}
+
+.booking-counter--warning {
+    border-left-color: #d9a600;
+    background: #fff8e1;
+}
+
+.booking-counter--error {
+    border-left-color: var(--rouge);
+    background: #fdecee;
+}
+
+.booking-note {
+    margin: var(--espace-3) 0 0;
+    color: var(--acier);
+    font-size: .82rem;
+    text-align: center;
+}
+
+.booking-back {
+    margin-top: var(--espace-4);
+    padding-top: var(--espace-3);
+    border-top: 1px solid var(--ligne);
+}
+
+.booking-back .btn-link {
+    min-height: 44px;
+    color: var(--acier);
+    font-size: .9rem;
+    text-decoration-color: var(--ligne-forte);
+}
+
+.booking-back .btn-link:hover {
+    color: var(--rouge-texte);
+}
+
+/* ==========================================================================
+   11. Classement public
+   ========================================================================== */
+.panel--table {
+    padding: 0;
+    overflow: hidden;
+}
+
+.panel--table .table-responsive {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.points-table {
+    min-width: 520px;
+    margin: 0;
+    border-color: var(--ligne);
+    font-variant-numeric: tabular-nums;
+}
+
+.points-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding: .9rem 1rem;
+    border: 0;
+    background: var(--charbon);
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.points-table thead th:last-child {
+    text-align: right;
+}
+
+.points-table tbody td {
+    padding: .9rem 1rem;
+    border-color: var(--ligne);
+    vertical-align: middle;
+}
+
+.points-table tbody tr {
+    transition: background-color var(--transition);
+}
+
+.points-table tbody tr:nth-child(even) {
+    background: rgba(20, 23, 26, .025);
+}
+
+.points-table tbody tr:hover {
+    background: rgba(31, 95, 191, .06);
+}
+
+.points-table > tbody > tr.points-table__row--leader {
+    background: rgba(215, 38, 61, .07);
+}
+
+.points-table > tbody > tr.points-table__row--leader > td:first-child {
+    box-shadow: inset 4px 0 0 var(--rouge);
+}
+
+.points-table tbody td:last-child {
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-align: right;
+}
+
+.rank {
+    color: var(--acier);
+    font-family: var(--font-titre);
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.points-table__row--leader .rank {
+    color: var(--rouge);
+}
+
+.table-note {
+    margin: 0;
+    padding: .9rem 1rem;
+    border-top: 1px solid var(--ligne);
+    background: var(--surface);
+    color: var(--acier);
+    font-size: .8rem;
+}
+
+/* ==========================================================================
+   12. États vides
+   ========================================================================== */
+.empty-state {
+    padding: clamp(2rem, 6vw, 4rem) 1.5rem;
+    border: 1px dashed var(--ligne-forte);
+    border-radius: var(--rayon-m);
+    background-color: #faf8f2;
+    background-image: repeating-linear-gradient(135deg, rgba(20, 23, 26, .03) 0 1px, transparent 1px 16px);
+    text-align: center;
+}
+
+.empty-state__icon {
+    display: block;
+    margin-bottom: .5rem;
+    color: var(--rouge);
+    font-size: 2.6rem;
+    line-height: 1;
+}
+
+.empty-state h2 {
+    margin-bottom: .5rem;
+}
+
+.empty-state p {
+    max-width: 46ch;
+    margin: 0 auto;
+    color: var(--acier);
+}
+
+/* ==========================================================================
+   13. Pied de page
+   ========================================================================== */
+.site-footer {
+    margin-top: var(--espace-6);
+    padding-block: var(--espace-4);
+    border-top: 1px solid var(--ligne);
+    background: #efeae0;
+    color: var(--acier);
+    font-size: .82rem;
+}
+
+.site-footer__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--espace-2);
+}
+
+.site-footer p {
+    margin: 0;
+}
+
+.site-footer__brand {
+    font-family: var(--font-titre);
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+}
+
+/* ==========================================================================
+   14. Adaptations responsives
+   ========================================================================== */
+@media (max-width: 991.98px) {
+    .site-header__inner {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: var(--espace-2);
+    }
+
+    .site-nav {
+        width: 100%;
+    }
+
+    .site-nav__list {
+        width: 100%;
+    }
+
+    .auth-wrap {
+        min-height: auto;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .site-main {
+        padding-block: var(--espace-5);
+    }
+
+    .competition-card__top {
+        flex-direction: column;
+        gap: .6rem;
+    }
+
+    .status-chip {
+        align-self: flex-start;
+    }
+
+    .section-head {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .site-footer__inner {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .brand__baseline {
+        display: none;
+    }
+
+    .site-nav__list {
+        gap: .1rem 1rem;
+    }
+
+    .site-nav__link {
+        font-size: .7rem;
+    }
+
+    .panel,
+    .competition-card {
+        padding: 1.1rem;
+    }
+}
+
+/* ==========================================================================
+   15. Mouvement réduit
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: .01ms;
+        animation-iteration-count: 1;
+        transition-duration: .01ms;
+    }
+}

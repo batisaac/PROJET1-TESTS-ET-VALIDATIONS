@@ -1,0 +1,113 @@
+{% macro alerte(message, categorie='info') %}
+    {% set libelles = {
+        'success': 'Réservation confirmée',
+        'error': 'Action impossible',
+        'warning': 'Attention',
+        'info': 'Information'
+    } %}
+    {% set icones = {
+        'success': 'bi-check-circle-fill',
+        'error': 'bi-exclamation-octagon-fill',
+        'warning': 'bi-exclamation-triangle-fill',
+        'info': 'bi-info-circle-fill'
+    } %}
+    <div class="alert alert-dismissible fade show flash flash--{{ categorie }}"
+         role="{{ 'alert' if categorie in ('error', 'warning') else 'status' }}"
+         data-testid="flash-message">
+        <span class="flash__icon" aria-hidden="true"><i class="bi {{ icones[categorie] }}"></i></span>
+        <div class="flash__content">
+            <strong class="flash__title">{{ libelles[categorie] }}</strong>
+            <span class="flash__message" lang="en">{{ message }}</span>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+    </div>
+{% endmacro %}
+
+
+{% macro carte_competition(competition, club) %}
+    {% set restantes = competition['numberOfPlaces']|int %}
+    {% set total = competition.get('initialPlaces', competition['numberOfPlaces'])|int %}
+    {% set taux = (restantes / total * 100) if total > 0 else 0 %}
+    {% if restantes == 0 %}
+        {% set etat = 'complet' %}
+        {% set icone = 'bi-x-octagon' %}
+    {% elif taux <= 15 %}
+        {% set etat = 'critique' %}
+        {% set icone = 'bi-exclamation-triangle' %}
+    {% elif taux <= 35 %}
+        {% set etat = 'limite' %}
+        {% set icone = 'bi-exclamation-circle' %}
+    {% else %}
+        {% set etat = 'disponible' %}
+        {% set icone = 'bi-check-circle' %}
+    {% endif %}
+
+    <article class="card competition-card competition-card--{{ etat }}"
+             data-testid="competition-card"
+             data-competition="{{ competition['name'] }}">
+        <div class="competition-card__top">
+            <div>
+                <p class="eyebrow tw-mb-1">Compétition</p>
+                <h3 class="competition-card__title">{{ competition['name'] }}</h3>
+            </div>
+            <span class="status-chip status-chip--{{ etat }}">
+                <i class="bi {{ icone }}" aria-hidden="true"></i>
+                {% if restantes == 0 %}
+                    Complet
+                {% elif restantes == 1 %}
+                    1 place restante
+                {% else %}
+                    {{ restantes }} places restantes
+                {% endif %}
+            </span>
+        </div>
+
+        <p class="competition-card__date">
+            <i class="bi bi-calendar3" aria-hidden="true"></i>
+            <span>{{ competition['date'] }}</span>
+        </p>
+
+        <div class="competition-card__gauge">
+            <div class="competition-card__gauge-head">
+                <span>Remplissage</span>
+                <span class="competition-card__gauge-value">{{ restantes }} / {{ total }}</span>
+            </div>
+            <progress class="gauge gauge--{{ etat }}"
+                      value="{{ restantes }}"
+                      max="{{ total if total > 0 else 1 }}"
+                      data-testid="competition-gauge"
+                      aria-label="{{ restantes }} places restantes sur {{ total }}"></progress>
+        </div>
+
+        <div class="competition-card__action">
+            {% if restantes > 0 %}
+                <a class="btn btn-brand w-100 tw-inline-flex tw-items-center tw-justify-center tw-gap-2"
+                   href="{{ url_for('book', competition=competition['name'], club=club['name']) }}"
+                   data-testid="book-link">
+                    <i class="bi bi-ticket-perforated" aria-hidden="true"></i>
+                    Réserver
+                </a>
+            {% else %}
+                <span class="btn btn-brand w-100 disabled tw-inline-flex tw-items-center tw-justify-center tw-gap-2"
+                      aria-disabled="true"
+                      data-testid="book-disabled">
+                    <i class="bi bi-slash-circle" aria-hidden="true"></i>
+                    Complet
+                </span>
+                <p class="competition-card__reason">Plus aucune place disponible.</p>
+            {% endif %}
+        </div>
+    </article>
+{% endmacro %}
+
+
+{% macro rang_club(clubs, club) %}
+    {% set points = club['points']|int %}
+    {% set ns = namespace(rang=1) %}
+    {% for autre in clubs %}
+        {% if autre['points']|int > points %}
+            {% set ns.rang = ns.rang + 1 %}
+        {% endif %}
+    {% endfor %}
+    {{ '%02d'|format(ns.rang) }}
+{% endmacro %}
