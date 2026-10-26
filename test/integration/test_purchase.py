@@ -1,5 +1,7 @@
 """Tests d'integration de l'achat de places."""
 
+import pytest
+
 DONNEES_VALIDES = {
     'club': 'Simply Lift',
     'competition': 'Spring Festival',
@@ -51,3 +53,14 @@ def test_places_non_numerique_ne_provoque_pas_d_erreur_serveur(client):
 
     assert response.status_code == 200
     assert b'invalid' in response.data
+
+
+@pytest.mark.parametrize('places', ['0', '-5'])
+def test_places_non_positives_refusees(client, places):
+    data = dict(DONNEES_VALIDES, places=places)
+
+    response = client.post('/purchasePlaces', data=data)
+
+    assert response.status_code == 200
+    assert b'at least one place' in response.data
+    assert b'Number of Places: 25' in response.data
