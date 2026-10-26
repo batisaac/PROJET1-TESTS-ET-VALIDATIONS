@@ -99,3 +99,23 @@ def test_demande_egale_au_stock_acceptee(client):
     assert response.status_code == 200
     assert b'Great-booking complete!' in response.data
     assert b'Number of Places: 0' in response.data
+
+
+def test_demande_superieure_a_12_places_refusee(client):
+    data = dict(DONNEES_VALIDES, places='13')
+
+    response = client.post('/purchasePlaces', data=data)
+
+    assert response.status_code == 200
+    assert b'more than 12 places' in response.data
+    assert b'Number of Places: 25' in response.data
+
+
+def test_demande_de_12_places_acceptee(client):
+    data = dict(DONNEES_VALIDES, places='12')
+
+    response = client.post('/purchasePlaces', data=data)
+
+    assert response.status_code == 200
+    assert b'Great-booking complete!' in response.data
+    assert b'Number of Places: 13' in response.data

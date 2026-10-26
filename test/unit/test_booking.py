@@ -7,6 +7,8 @@ from booking import parse_places, validate_purchase
 CLUB = {'points': '13'}
 COMPETITION = {'numberOfPlaces': '25'}
 COMPETITION_PETITE = {'numberOfPlaces': '3'}
+CLUB_RICHE = {'points': '100'}
+COMPETITION_GRANDE = {'numberOfPlaces': '100'}
 
 
 def test_parse_places_entier_valide():
@@ -44,3 +46,13 @@ def test_validate_refuse_demande_superieure_au_stock():
 
 def test_validate_accepte_demande_egale_au_stock():
     assert validate_purchase(CLUB, COMPETITION_PETITE, 3) is None
+
+
+def test_validate_accepte_douze_places():
+    assert validate_purchase(CLUB_RICHE, COMPETITION_GRANDE, 12) is None
+
+
+def test_validate_refuse_plus_de_douze_places():
+    message = validate_purchase(CLUB_RICHE, COMPETITION_GRANDE, 13)
+
+    assert 'more than 12 places' in message
