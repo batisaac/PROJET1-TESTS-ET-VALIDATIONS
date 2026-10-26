@@ -1,11 +1,11 @@
 # Rapport de test — GUDLFT
 
-> Version 1.7 — 2026-10-26
+> Version 1.8 — 2026-10-26
 > Auteur : Isaac Batoua (`batisaac`)
 > Dépôt : <https://github.com/batisaac/PROJET1-TESTS-ET-VALIDATIONS>
-> Branche courante : `main` @ `54dcb8b`
+> Branche courante : `main` @ `cbcabf6`
 
-**État d'avancement : phase 1 en cours — 7 groupes d'anomalies traités (19 anomalies corrigées sur 26).**
+**État d'avancement : phase 1 en cours — 8 groupes d'anomalies traités (20 anomalies corrigées sur 26).**
 Les sections marquées *(à compléter)* le seront au fur et à mesure ; ce document ne
 contient aucun résultat non mesuré.
 
@@ -165,7 +165,7 @@ la branche `QA` sera créée depuis `main` en fin de projet et **ne sera jamais 
 | Déduction des points | T-I19 | **écrit, VERT** |
 | Concours complet | T-I20 | **écrit, VERT** |
 | Message avec le nombre de places | T-I21 | **écrit, VERT** |
-| Persistance JSON | T-I22 | à écrire |
+| Persistance JSON | T-I22 | **écrit, VERT** |
 | Déconnexion effective | T-I23 | à écrire |
 | Tableau public sans connexion (phase 2) | T-I24 | à écrire |
 | Contenu du tableau public (phase 2) | T-I25 | à écrire |
@@ -310,7 +310,7 @@ Les numéros de ligne cités (`server.py:29/35/36/46/47/48`) sont ceux du code d
 
 | ID | Emplacement | Problème | Gravité | Repro | État |
 |---|---|---|---|---|---|
-| **B17** | `server.py:20-21,49` | Aucune persistance : les JSON ne sont jamais réécrits, tout est perdu au redémarrage | Majeur | manuel | à corriger |
+| **B17** | `server.py:20-21,49` | Aucune persistance : les JSON ne sont jamais réécrits, tout est perdu au redémarrage | Majeur | manuel | **corrigé** |
 | **B18** | `repository.py` (ex-`server.py:6,13`) | Chemins relatifs au répertoire courant | Mineur | audit | **corrigé** |
 | **B19** | `server.py:18` | `secret_key` en dur et versionnée | Mineur (sécurité) | audit | à corriger |
 | **B20** | `server.py:33-51` | Aucune authentification : réservation possible pour n'importe quel club | Majeur (sécurité) | audit | à corriger |
@@ -332,9 +332,9 @@ Les numéros de ligne cités (`server.py:29/35/36/46/47/48`) sont ceux du code d
 |---|---|---|
 | Crashs / entrées invalides | 11 | 11 (B1 à B9, B5bis) |
 | Règles métier | 7 | 7 (B10 à B16) |
-| Robustesse / sécurité / testabilité | 6 | 1 (B18) |
+| Robustesse / sécurité / testabilité | 6 | 2 (B17, B18) |
 | Interface / fonctionnalités | 2 | 0 |
-| **Total** | **26** | **19** |
+| **Total** | **26** | **20** |
 
 Reproduction : 14 anomalies via script + 4 via navigateur = **18 constatées** ; 8 identifiées par audit.
 
@@ -346,9 +346,9 @@ Trois dossiers de tests sont actifs à ce stade :
 
 - `test/integration/test_login.py` (4 tests, T-I01 à T-I04) ;
 - `test/integration/test_booking_url.py` (4 tests, T-I05 à T-I07b) ;
-- `test/integration/test_purchase.py` (15 cas, T-I08 à T-I21) ;
+- `test/integration/test_purchase.py` (16 cas, T-I08 à T-I22) ;
 - `test/unit/` : `test_club.py`, `test_competition.py`, `test_repository.py`
-  et `test_booking.py` (26 tests, T-U01 à T-U24).
+  et `test_booking.py` (28 tests, T-U01 à T-U26).
 
 Les fichiers `test/integration/test_points_public.py` et
 `test/fonctionnel/test_parcours_complet.py` sont créés mais **vides** (backlog §9).
@@ -362,14 +362,14 @@ python -m pytest -v
 **Résultat actuel :**
 
 ```text
-test/integration/test_booking_url.py ....               [  8%]
-test/integration/test_login.py ....                     [ 16%]
-test/integration/test_purchase.py ...............       [ 46%]
-test/unit/test_booking.py ...............               [ 77%]
-test/unit/test_club.py ......                           [ 89%]
-test/unit/test_competition.py ..                        [ 93%]
-test/unit/test_repository.py ...                        [100%]
-============================= 49 passed in 0.98s ==============================
+test/integration/test_booking_url.py ....               [  7%]
+test/integration/test_login.py ....                     [ 15%]
+test/integration/test_purchase.py ................      [ 46%]
+test/unit/test_booking.py ...............               [ 75%]
+test/unit/test_club.py ......                           [ 86%]
+test/unit/test_competition.py ..                        [ 90%]
+test/unit/test_repository.py .....                      [100%]
+============================= 52 passed in 3.13s ==============================
 ```
 
 **Preuve TDD (test de connexion, avant correction) :**
@@ -414,6 +414,7 @@ pytest échouait au chargement avec `ModuleNotFoundError: No module named 'repos
 | T-I19 | `test_achat_debute_les_points_et_confirme_le_nombre` | Intégration (happy) | points 4 → 3 + « 1 place » (B10, B15) | VERT |
 | T-I20 | `test_concours_complet_refuse` | Intégration (sad) | message « competition is full » (B14) | VERT |
 | T-I21 | `test_achat_de_deux_places_debute_deux_points` | Intégration (happy) | points 13 → 11 + « 2 places » (B10, B15) | VERT |
+| T-I22 | `test_achat_persiste_les_points_et_le_stock` | Intégration | disque : 12 points, 24 places (B17) | VERT |
 | T-U01 | `test_load_clubs_lit_les_trois_clubs` | Unitaire | 3 clubs, premier = Simply Lift | VERT |
 | T-U02 | `test_load_competitions_lit_les_deux_competitions` | Unitaire | 2 compétitions, première = Spring Festival | VERT |
 | T-U03 | `test_load_clubs_fonctionne_depuis_un_autre_repertoire` | Unitaire | chargement indépendant du répertoire courant (B18) | VERT |
@@ -438,8 +439,10 @@ pytest échouait au chargement avec `ModuleNotFoundError: No module named 'repos
 | T-U22 | `test_validate_refuse_solde_de_points_insuffisant` | Unitaire | 4 points, 5 places → message (B11) | VERT |
 | T-U23 | `test_validate_refuse_concours_complet` | Unitaire | stock 0 → « competition is full » (B14) | VERT |
 | T-U24 | `test_confirmation_message_indique_le_nombre_de_places` (1 et 2) | Unitaire | « 1 place » / « 2 places » (B15) | VERT |
+| T-U25 | `test_save_clubs_ecrit_un_json_relisible` | Unitaire | écriture puis relecture (B17) | VERT |
+| T-U26 | `test_save_competitions_ecrit_un_json_relisible` | Unitaire | écriture puis relecture (B17) | VERT |
 
-Répartition : **26 unitaires / 23 intégration** — les tests fonctionnels viendront après les
+Répartition : **28 unitaires / 24 intégration** — les tests fonctionnels viendront après les
 corrections métier (§9).
 
 ---
@@ -450,9 +453,9 @@ corrections métier (§9).
 |---|---|
 | `test/unit/test_club.py` | — (couvert) |
 | `test/unit/test_competition.py` | dates passée/future |
-| `test/unit/test_repository.py` | écriture JSON, fichier absent, JSON corrompu |
+| `test/unit/test_repository.py` | fichier absent, JSON corrompu |
 | `test/integration/test_booking_url.py` | — (complet) |
-| `test/integration/test_purchase.py` | T-I22, T-I23 (persistance, déconnexion) |
+| `test/integration/test_purchase.py` | T-I23 (déconnexion) |
 | `test/integration/test_points_public.py` | T-I24, T-I25 (phase 2) |
 | `test/fonctionnel/test_parcours_complet.py` | parcours complet, limite de 12, stock épuisé, consultation publique |
 | `locustfile.py` | charge 6 utilisateurs, seuils 5 s / 2 s |
@@ -649,11 +652,36 @@ def confirmation_message(places):
 | B14 | message de concours complet absent | T-I20, T-U23 |
 | B15 | confirmation sans le nombre de places | T-I19, T-I21, T-U24 |
 
-### 10.9 Autres branches
+### 10.9 Branche `bug/persistance-json` — B17
+
+`repository.py` gagne l'écriture, symétrique de la lecture, avec un chemin injectable pour
+les tests et une écriture atomique :
+
+```python
+def save_clubs(clubs, path=None):
+    _write({'clubs': clubs}, path or CLUBS_FILE)
+
+
+def _write(data, path):
+    path = Path(path)
+    temporaire = path.with_name(path.name + '.tmp')
+    with open(temporaire, 'w', encoding='utf-8') as fichier:
+        json.dump(data, fichier, indent=4, ensure_ascii=False)
+    temporaire.replace(path)
+```
+
+`purchasePlaces` enregistre les deux fichiers après avoir appliqué les changements. La
+fixture `donnees_reinitialisees` sauvegarde et restaure les JSON réels autour de chaque
+test, pour qu'un test de persistance ne pollue pas les suivants.
+
+| Anomalie | Cause traitée | Tests |
+|---|---|---|
+| B17 | JSON jamais réécrits | T-I22, T-U25, T-U26 |
+
+### 10.10 Autres branches
 
 | Anomalies | Branche prévue | État |
 |---|---|---|
-| B17 | `bug/persistance-json` | à faire |
 | B19 à B22 | `bug/robustesse-securite` | à faire |
 | B23, B24 | `bug/interface` | à faire |
 | — | `chore/qualite-flake8` | à faire |
@@ -677,11 +705,11 @@ Name             Stmts   Miss  Cover   Missing
 booking.py          22      0   100%
 club.py              6      0   100%
 competition.py       2      0   100%
-repository.py       11      0   100%
-server.py           49      1    98%   68
+repository.py       21      0   100%
+server.py           51      1    98%   75
 ----------------------------------------------
-TOTAL               90      1    99%
-49 passed in 0.98s
+TOTAL              102      1    99%
+52 passed in 3.13s
 ```
 
 | Fichier | % | Lignes non couvertes |
@@ -690,12 +718,12 @@ TOTAL               90      1    99%
 | `club.py` | 100 % | — |
 | `competition.py` | 100 % | — |
 | `repository.py` | 100 % | — |
-| `server.py` | 98 % | 68 (`/logout`) |
+| `server.py` | 98 % | 75 (`/logout`) |
 | **Total** | **99 %** | objectif ≥ 60 % largement atteint |
 
 **Analyse** : seule la route `/logout` reste non couverte. Attention : ces 99 % mesurent
-l'**exécution**, pas le respect des règles métier — la persistance et la sécurité ne sont
-pas encore implémentées (branches suivantes).
+l'**exécution**, pas le respect des règles métier — la sécurité et l'interface ne sont pas
+encore traitées (branches suivantes).
 
 ---
 
@@ -726,7 +754,7 @@ limite par défaut de 79 caractères).
 | `repository.py`, `club.py`, `competition.py`, `booking.py` | 0 |
 
 Les erreurs `E111`, `E117` et `W292` de l'état initial (indentation et fin de fichier) ont
-disparu avec la réécriture de `server.py`. Les branches B10 à B16 n'ont ajouté aucune
+disparu avec la réécriture de `server.py`. Les branches B10 à B17 n'ont ajouté aucune
 erreur.
 
 **État : non conforme.** Objectif : `flake8 .` sans erreur, via la branche
@@ -760,27 +788,29 @@ La section 6 « Flake8 Report » du `README.md` sera remplie à ce moment-là.
 | 5 | `coverage` mesure l'exécution, pas la qualité des assertions | Chaque fonctionnalité testée en happy + sad path |
 | 6 | Locust mesurerait le serveur de développement Flask, pas un serveur de production | Résultats indicatifs ; seuils (5 s / 2 s) très larges |
 | 7 | Le client de test Flask ne teste pas le JavaScript (ex. blocage de `abc` par `<input type="number">`) | D'où l'importance de la validation serveur (T-I12) |
-| 8 | Les tests unitaires sont écrits au fil des branches, pas en bloc final | Répartition actuelle : 26 unitaires / 23 intégration |
+| 8 | Les tests unitaires sont écrits au fil des branches, pas en bloc final | Répartition actuelle : 28 unitaires / 24 intégration |
+| 9 | `clubs.json` et `competitions.json` sont écrits séparément (pas de transaction commune) | Un arrêt entre les deux écritures peut désynchroniser points et stock |
+| 10 | Les tests de persistance écrivent dans les vrais fichiers JSON (restaurés par la fixture) | Ne pas lancer deux `pytest` en parallèle sur le même dossier |
 
 ---
 
 ## 15. Conclusion
 
-**État actuel** : **49 tests écrits, 49 verts** (26 unitaires, 23 intégration).
-Anomalies corrigées : **19 sur 26** — connexion (B1, B2, B2b), chemins JSON (B18),
+**État actuel** : **52 tests écrits, 52 verts** (28 unitaires, 24 intégration).
+Anomalies corrigées : **20 sur 26** — connexion (B1, B2, B2b), chemins JSON (B18),
 page de réservation (B3, B4, B5, B5bis), formulaire d'achat (B6, B7, B8, B9),
-et toutes les règles métier (B10 à B16).
+toutes les règles métier (B10 à B16) et la persistance (B17).
 
-**Reste à faire** en phase 1 : 7 anomalies (persistance B17, sécurité B19 à B22,
-interface B23 et B24), puis Flake8.
+**Reste à faire** en phase 1 : 6 anomalies (sécurité/robustesse B19 à B22, interface
+B23 et B24), puis Flake8.
 **Phase 2** : non commencée.
 
 Points d'attention confirmés par les mesures :
 - la couverture globale est de **99 %**, mais elle mesure l'exécution, pas les règles métier ;
 - le code n'est **pas conforme Flake8** (23 erreurs restantes) ;
-- les points sont contrôlés et débités **en mémoire** : sans persistance (B17), un
-  redémarrage restaure les valeurs d'origine ;
-- l'absence de persistance (**B17**) reste l'anomalie la plus structurante.
+- les achats sont désormais persistés, mais `secret_key` est toujours en dur (B19),
+  aucune authentification ne protège la réservation (B20) et `/logout` reste sans effet (B21) ;
+- l'interface affiche encore les compétitions passées (B23).
 
 ---
 
@@ -810,7 +840,7 @@ python -m flake8 server.py repository.py club.py competition.py booking.py test/
 ├── club.py                     MAX_PLACES, find_by_email, find_by_name
 ├── competition.py              find_by_name
 ├── booking.py                  parse_places, validate_purchase
-├── repository.py               load_clubs, load_competitions (chemins absolus)
+├── repository.py               load/save clubs et competitions (écriture atomique)
 ├── clubs.json
 ├── competitions.json
 ├── templates/
@@ -827,12 +857,12 @@ python -m flake8 server.py repository.py club.py competition.py booking.py test/
     │   ├── test_booking.py         (15 tests — VERT)
     │   ├── test_club.py            (6 tests — VERT)
     │   ├── test_competition.py     (2 tests — VERT)
-    │   └── test_repository.py      (3 tests — VERT)
+    │   └── test_repository.py      (5 tests — VERT)
     ├── integration/
     │   ├── __init__.py
     │   ├── test_login.py           (4 tests — VERT)
     │   ├── test_booking_url.py     (4 tests — VERT)
-    │   ├── test_purchase.py        (15 tests — VERT)
+    │   ├── test_purchase.py        (16 tests — VERT)
     │   └── test_points_public.py   (vide)
     └── fonctionnel/
         ├── __init__.py
