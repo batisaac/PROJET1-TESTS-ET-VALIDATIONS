@@ -2,6 +2,9 @@
 
 import pytest
 
+import server
+from competition import find_by_name
+
 DONNEES_VALIDES = {
     'club': 'Simply Lift',
     'competition': 'Spring Festival',
@@ -64,3 +67,35 @@ def test_places_non_positives_refusees(client, places):
     assert response.status_code == 200
     assert b'at least one place' in response.data
     assert b'Number of Places: 25' in response.data
+
+
+def test_demande_superieure_au_stock_refusee(client):
+    competition = find_by_name(server.competitions, 'Fall Classic')
+    competition['numberOfPlaces'] = '5'
+    data = {
+        'club': 'Simply Lift',
+        'competition': 'Fall Classic',
+        'places': '6',
+    }
+
+    response = client.post('/purchasePlaces', data=data)
+
+    assert response.status_code == 200
+    assert b'not enough places' in response.data
+    assert b'Number of Places: 5' in response.data
+
+
+def test_demande_egale_au_stock_acceptee(client):
+    competition = find_by_name(server.competitions, 'Fall Classic')
+    competition['numberOfPlaces'] = '5'
+    data = {
+        'club': 'Simply Lift',
+        'competition': 'Fall Classic',
+        'places': '5',
+    }
+
+    response = client.post('/purchasePlaces', data=data)
+
+    assert response.status_code == 200
+    assert b'Great-booking complete!' in response.data
+    assert b'Number of Places: 0' in response.data

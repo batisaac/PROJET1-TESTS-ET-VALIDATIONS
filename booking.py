@@ -13,4 +13,6 @@ def validate_purchase(club, competition, places):
     """Retourne un message d'erreur, ou None si l'achat est valide."""
     if places < 1:
         return 'Sorry, you must book at least one place.'
+    if places > int(competition['numberOfPlaces']):
+        return 'Sorry, there are not enough places available.'
     return None
