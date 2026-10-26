@@ -1,11 +1,11 @@
 # Rapport de test — GUDLFT
 
-> Version 1.1 — 2026-10-26
+> Version 1.2 — 2026-10-26
 > Auteur : Isaac Batoua (`batisaac`)
 > Dépôt : <https://github.com/batisaac/PROJET1-TESTS-ET-VALIDATIONS>
-> Branche courante : `bug/email-inconnu` (créée depuis `main` @ `4ea6d0c`)
+> Branche courante : `refactor/logique-metier` (depuis `main` @ `1672a8d`)
 
-**État d'avancement : phase 1 en cours — 1 groupe d'anomalies corrigé sur 10.**
+**État d'avancement : phase 1 en cours — 2 groupes d'anomalies traités (B1/B2/B2b corrigés, B18 corrigé).**
 Les sections marquées *(à compléter)* le seront au fur et à mesure ; ce document ne
 contient aucun résultat non mesuré.
 
@@ -129,8 +129,8 @@ les deux fichiers avant chaque test : sans elle, un achat d'un test modifierait 
 ```python
 @pytest.fixture(autouse=True)
 def donnees_reinitialisees():
-    server.clubs = server.loadClubs()
-    server.competitions = server.loadCompetitions()
+    server.clubs = load_clubs()
+    server.competitions = load_competitions()
     yield
 ```
 
@@ -310,7 +310,7 @@ Les numéros de ligne cités (`server.py:29/35/36/46/47/48`) sont ceux du code d
 | ID | Emplacement | Problème | Gravité | Repro | État |
 |---|---|---|---|---|---|
 | **B17** | `server.py:20-21,49` | Aucune persistance : les JSON ne sont jamais réécrits, tout est perdu au redémarrage | Majeur | manuel | à corriger |
-| **B18** | `server.py:6,13` | Chemins relatifs au répertoire courant | Mineur | audit | à corriger |
+| **B18** | `repository.py` (ex-`server.py:6,13`) | Chemins relatifs au répertoire courant | Mineur | audit | **corrigé** |
 | **B19** | `server.py:18` | `secret_key` en dur et versionnée | Mineur (sécurité) | audit | à corriger |
 | **B20** | `server.py:33-51` | Aucune authentification : réservation possible pour n'importe quel club | Majeur (sécurité) | audit | à corriger |
 | **B21** | `server.py:57-59` | `/logout` sans effet (aucune session) | Mineur | audit | à corriger |
@@ -331,9 +331,9 @@ Les numéros de ligne cités (`server.py:29/35/36/46/47/48`) sont ceux du code d
 |---|---|---|
 | Crashs / entrées invalides | 11 | 3 (B1, B2, B2b) |
 | Règles métier | 7 | 0 |
-| Robustesse / sécurité / testabilité | 6 | 0 |
+| Robustesse / sécurité / testabilité | 6 | 1 (B18) |
 | Interface / fonctionnalités | 2 | 0 |
-| **Total** | **26** | **3** |
+| **Total** | **26** | **4** |
 
 Reproduction : 14 anomalies via script + 4 via navigateur = **18 constatées** ; 8 identifiées par audit.
 
@@ -341,16 +341,29 @@ Reproduction : 14 anomalies via script + 4 via navigateur = **18 constatées** ;
 
 ## 8. Tests réalisés
 
-Un seul fichier de test contient des tests à ce stade : `test/integration/test_login.py`.
-Les autres fichiers de l'arborescence sont créés mais **vides** (backlog §9).
+Deux fichiers contiennent des tests à ce stade :
+
+- `test/integration/test_login.py` (4 tests, T-I01 à T-I04) ;
+- `test/unit/test_club.py` et `test/unit/test_repository.py` (7 tests, T-U01 à T-U07).
+
+Les autres fichiers sont créés mais **vides** (backlog §9).
 
 ### 8.1 Exécution
 
 ```cmd
-python -m pytest test/integration/test_login.py -v
+python -m pytest -v
 ```
 
-**Avant correction :**
+**Résultat actuel :**
+
+```text
+test/integration/test_login.py ....                     [ 36%]
+test/unit/test_club.py ....                             [ 72%]
+test/unit/test_repository.py ...                        [100%]
+============================= 11 passed in 1.00s ==============================
+```
+
+**Preuve TDD (test de connexion, avant correction) :**
 
 ```text
 test/integration/test_login.py::test_connexion_email_valide PASSED              [ 25%]
@@ -363,15 +376,8 @@ server.py:29: IndexError
 ========================= 3 failed, 1 passed in 2.03s =========================
 ```
 
-**Après correction :**
-
-```text
-test/integration/test_login.py::test_connexion_email_valide PASSED              [ 25%]
-test/integration/test_login.py::test_connexion_email_inconnu_ne_provoque_pas_d_erreur_serveur PASSED [ 50%]
-test/integration/test_login.py::test_connexion_champ_email_absent_ne_provoque_pas_d_erreur_serveur PASSED [ 75%]
-test/integration/test_login.py::test_connexion_email_vide_ne_provoque_pas_d_erreur_serveur PASSED [100%]
-============================== 4 passed in 0.36s ==============================
-```
+Les tests unitaires ont également été écrits **avant** les modules `repository.py` et `club.py` :
+pytest échouait au chargement avec `ModuleNotFoundError: No module named 'repository'`.
 
 ### 8.2 Détail des tests
 
@@ -381,8 +387,16 @@ test/integration/test_login.py::test_connexion_email_vide_ne_provoque_pas_d_erre
 | T-I02 | `test_connexion_email_inconnu_ne_provoque_pas_d_erreur_serveur` | Intégration (sad) | HTTP 200 + message `not registered` | VERT |
 | T-I03 | `test_connexion_champ_email_absent_ne_provoque_pas_d_erreur_serveur` | Intégration (sad) | HTTP 200 + message `not registered` | VERT |
 | T-I04 | `test_connexion_email_vide_ne_provoque_pas_d_erreur_serveur` | Intégration (sad) | HTTP 200 + message `not registered` | VERT |
+| T-U01 | `test_load_clubs_lit_les_trois_clubs` | Unitaire | 3 clubs, premier = Simply Lift | VERT |
+| T-U02 | `test_load_competitions_lit_les_deux_competitions` | Unitaire | 2 compétitions, première = Spring Festival | VERT |
+| T-U03 | `test_load_clubs_fonctionne_depuis_un_autre_repertoire` | Unitaire | chargement indépendant du répertoire courant (B18) | VERT |
+| T-U04 | `test_find_by_email_trouve_le_club` | Unitaire | retourne le club correspondant | VERT |
+| T-U05 | `test_find_by_email_inconnu_retourne_none` | Unitaire | `None` si email inconnu (B1) | VERT |
+| T-U06 | `test_find_by_email_ignore_les_espaces_autour` | Unitaire | `"  a@club.com  "` reconnu | VERT |
+| T-U07 | `test_find_by_email_vide_retourne_none` | Unitaire | `""` → `None` (B2b) | VERT |
 
-Suite complète : `python -m pytest -q` → **4 passed in 0.44s**.
+Répartition : **7 unitaires / 4 intégration** — les tests fonctionnels viendront après les
+corrections métier (§9).
 
 ---
 
@@ -390,17 +404,14 @@ Suite complète : `python -m pytest -q` → **4 passed in 0.44s**.
 
 | Fichier | Tests prévus |
 |---|---|
-| `test/unit/test_club.py` | conversion des points, débit, solde suffisant, limite de 12 |
+| `test/unit/test_club.py` | débit de points, solde suffisant, limite de 12 |
 | `test/unit/test_competition.py` | places disponibles, concours complet, places suffisantes, date passée/future |
-| `test/unit/test_repository.py` | lecture/écriture JSON, fichier absent, JSON corrompu |
+| `test/unit/test_repository.py` | écriture JSON, fichier absent, JSON corrompu |
 | `test/integration/test_booking_url.py` | T-I05 à T-I07 |
 | `test/integration/test_purchase.py` | T-I08 à T-I21 |
 | `test/integration/test_points_public.py` | T-I22, T-I23 (phase 2) |
 | `test/fonctionnel/test_parcours_complet.py` | parcours complet, limite de 12, stock épuisé, consultation publique |
 | `locustfile.py` | charge 6 utilisateurs, seuils 5 s / 2 s |
-
-> Les tests unitaires supposent l'extraction de la logique métier dans des modules dédiés
-> (voir §11, branche `refactor/logique-metier`). Ils sont donc volontairement différés.
 
 ---
 
@@ -436,9 +447,24 @@ sans quoi le message d'erreur ne serait pas visible.
 Choix : retour **HTTP 200** avec le formulaire et un message, plutôt qu'un 404 — l'utilisateur
 reste sur la page de connexion et peut corriger sa saisie.
 
-### 10.2 Autres branches
+### 10.2 Branche `refactor/logique-metier` — B18
 
-*(à compléter : aucune autre correction n'a encore été réalisée)*
+Objectif : sortir la logique de `server.py` **sans modifier le comportement** (les 4 tests
+d'intégration restent verts), et rendre les chemins JSON indépendants du répertoire courant.
+
+| Fichier créé | Contenu |
+|---|---|
+| `repository.py` | `load_clubs()`, `load_competitions()` ; chemins calculés depuis `Path(__file__).resolve().parent` |
+| `club.py` | `MAX_PLACES = 12`, `find_by_email(clubs, email)` |
+
+`server.py` se contente désormais d'appeler ces fonctions. `test/conftest.py` utilise
+`repository.load_clubs()` / `load_competitions()` pour la réinitialisation entre tests.
+
+| Anomalie | Cause traitée | Tests |
+|---|---|---|
+| B18 | chemins relatifs au répertoire courant | T-U03 |
+
+### 10.3 Autres branches
 
 | Anomalies | Branche prévue | État |
 |---|---|---|
@@ -449,7 +475,7 @@ reste sur la page de connexion et peut corriger sa saisie.
 | B12 | `bug/limite-12-places` | à faire |
 | B10, B11, B14, B15 | `bug/points-et-messages` | à faire |
 | B17 | `bug/persistance-json` | à faire |
-| B18 à B22 | `bug/robustesse-securite` | à faire |
+| B19 à B22 | `bug/robustesse-securite` | à faire |
 | B23, B24 | `bug/interface` | à faire |
 | — | `chore/qualite-flake8` | à faire |
 | F1, F2 | `feature/tableau-points-public` | à faire |
@@ -458,32 +484,36 @@ reste sur la page de connexion et peut corriger sa saisie.
 
 ## 11. Couverture de code
 
-**Commande :**
+**Commande (code applicatif uniquement) :**
 
 ```cmd
-python -m pytest --cov=server --cov-report=term-missing -q
+python -m pytest --cov=server --cov=repository --cov=club --cov-report=term-missing -q
 ```
 
 **Résultat mesuré (2026-10-26) :**
 
 ```text
-Name        Stmts   Miss  Cover   Missing
------------------------------------------
-server.py      44     14    68%   25, 39-45, 50-55, 63
------------------------------------------
-TOTAL          44     14    68%
-4 passed in 0.92s
+Name            Stmts   Miss  Cover   Missing
+---------------------------------------------
+club.py             4      0   100%
+repository.py      11      0   100%
+server.py          36     14    61%   15, 28-34, 39-44, 52
+---------------------------------------------
+TOTAL              51     14    73%
+11 passed in 1.00s
 ```
 
 | Fichier | % | Lignes non couvertes |
 |---|---|---|
-| `server.py` | 68 % | 25 (`/`), 39-45 (`/book`), 50-55 (`/purchasePlaces`), 63 (`/logout`) |
+| `club.py` | 100 % | — |
+| `repository.py` | 100 % | — |
+| `server.py` | 61 % | 15 (`/`), 28-34 (`/book`), 39-44 (`/purchasePlaces`), 52 (`/logout`) |
+| **Total** | **73 %** | objectif ≥ 60 % atteint |
 
-**Analyse honnête** : les 68 % dépassent déjà l'objectif de 60 %, mais cette mesure est
-**structurelle** : les décorateurs de routes sont exécutés à l'import du module, donc
-comptés comme couverts. Elle ne prouve **pas** que les règles métier sont testées — les
-routes d'achat (`50-55`) et de réservation (`39-45`) ne sont pas encore exercées.
-La couverture utile sera réévaluée après les branches `bug/purchase-*` et `refactor/*`.
+**Analyse** : `club.py` et `repository.py` sont entièrement couverts, ce qui valide les
+fonctions extraites. En revanche, `server.py` reste à 61 % : les routes `/book`,
+`/purchasePlaces` et `/logout` ne sont **pas encore exercées**. L'objectif de 60 % est atteint
+globalement, mais la couverture des règles métier sera réévaluée après les branches `bug/*`.
 
 ---
 
@@ -492,25 +522,27 @@ La couverture utile sera réévaluée après les branches `bug/purchase-*` et `r
 **Commande :**
 
 ```cmd
-python -m flake8 server.py test/ --statistics
+python -m flake8 server.py repository.py club.py test/ --statistics
 ```
 
-**Résultat mesuré : 27 erreurs** (aucune configuration `setup.cfg` pour l'instant, donc
+**Résultat mesuré : 21 erreurs** (aucune configuration `setup.cfg` pour l'instant, donc
 limite par défaut de 79 caractères).
 
 ```text
-4     E111 indentation is not a multiple of 4
-2     E117 over-indented
 12    E231 missing whitespace after ','
 2     E302 expected 2 blank lines, found 1
-6     E501 line too long (> 79 characters)
-1     W292 no newline at end of file
+7     E501 line too long (> 79 characters)
 ```
 
 | Fichier | Erreurs |
 |---|---|
-| `server.py` | 26 |
-| `test/integration/test_login.py` | 1 (E501 ligne 5 : appel `client.post` à 80 caractères) |
+| `server.py` | 19 (E231, E302, E501) |
+| `test/integration/test_login.py` | 1 (E501 ligne 5) |
+| `test/unit/test_repository.py` | 1 (E501 ligne 20) |
+| `repository.py`, `club.py` | 0 |
+
+Les erreurs `E111`, `E117` et `W292` de l'état initial (indentation et fin de fichier) ont
+disparu avec la réécriture de `server.py`.
 
 **État : non conforme.** Objectif : `flake8 .` sans erreur, via la branche
 `chore/qualite-flake8` (formatage + `setup.cfg` avec `max-line-length = 99`).
@@ -539,26 +571,28 @@ La section 6 « Flake8 Report » du `README.md` sera remplie à ce moment-là.
 | 1 | Section « Issues » du dépôt d'origine **vide** (0 issue) malgré l'annonce du commanditaire | Inventaire reconstruit par audit + reproduction ; exhaustivité non garantie |
 | 2 | `requirements.txt` d'origine inutilisable (Flask 1.1.2 / MarkupSafe 1.1.1 / click 7.1.2 incompatibles Python 3.14) | Montée de version vers Flask 3.1.3 ; régressions couvertes par les tests au fur et à mesure |
 | 3 | Compétitions de démonstration datées de 2020 (donc passées) alors que l'exigence porte sur les compétitions à venir | Tests à écrire avec des dates injectées par fixture |
-| 4 | Couverture actuelle (68 %) **structurelle**, non représentative des règles métier | À réévaluer après les tests d'achat et le refactor |
+| 4 | Couverture actuelle (73 %) encore portée par `club.py` / `repository.py` à 100 % ; `server.py` reste à 61 % | À réévaluer après les tests d'achat |
 | 5 | `coverage` mesure l'exécution, pas la qualité des assertions | Chaque fonctionnalité testée en happy + sad path |
 | 6 | Locust mesurerait le serveur de développement Flask, pas un serveur de production | Résultats indicatifs ; seuils (5 s / 2 s) très larges |
 | 7 | Le client de test Flask ne teste pas le JavaScript (ex. blocage de `abc` par `<input type="number">`) | D'où l'importance de la validation serveur (T-I12) |
-| 8 | Les tests unitaires sont différés tant que la logique reste dans `server.py` | Prévu : branche `refactor/logique-metier` |
+| 8 | Les tests unitaires sont écrits au fil des branches, pas en bloc final | Répartition actuelle : 7 unitaires / 4 intégration |
 
 ---
 
 ## 15. Conclusion
 
-**État actuel** : 4 tests écrits, 4 verts. Les anomalies **B1, B2 et B2b** sont corrigées
-et couvertes par des tests qui échouaient avant la correction (preuve TDD conservée §8.1).
+**État actuel** : **11 tests écrits, 11 verts** (7 unitaires, 4 intégration).
+Les anomalies **B1, B2, B2b** (connexion) et **B18** (chemins JSON) sont corrigées et
+couvertes par des tests qui échouaient avant la correction (preuve TDD conservée §8.1).
+La logique métier est désormais isolée dans `club.py` et `repository.py` (100 % couverts).
 
-**Reste à faire** en phase 1 : 21 anomalies (dont 8 crashs HTTP), puis Flake8.
+**Reste à faire** en phase 1 : 22 anomalies (dont 8 crashs HTTP), puis Flake8.
 **Phase 2** : non commencée.
 
 Points d'attention confirmés par les mesures :
-- l'objectif de couverture (60 %) est atteint « sur le papier » (68 %) mais **pas encore
-  de façon significative** : les routes d'achat ne sont pas testées ;
-- le code n'est **pas conforme Flake8** (27 erreurs) ;
+- la couverture globale est de **73 %**, mais `server.py` n'est qu'à **61 %** : les routes
+  d'achat et de réservation ne sont pas encore exercées ;
+- le code n'est **pas conforme Flake8** (21 erreurs restantes) ;
 - l'absence de persistance (**B17**) reste l'anomalie la plus structurante : sans elle,
   aucun test d'achat ne peut vérifier durablement l'état.
 
@@ -578,30 +612,42 @@ python -m pytest test/unit -v
 python -m pytest test/integration -v
 python -m pytest test/fonctionnel -v
 
-python -m pytest --cov=server --cov-report=term-missing --cov-report=html
-python -m flake8 server.py test/ --statistics
+python -m pytest --cov=server --cov=repository --cov=club --cov-report=term-missing --cov-report=html
+python -m flake8 server.py repository.py club.py test/ --statistics
 ```
 
 ## Annexe B — Arborescence
 
 ```text
-test/
-├── __init__.py
-├── conftest.py
-├── unit/
-│   ├── __init__.py
-│   ├── test_club.py            (vide)
-│   ├── test_competition.py     (vide)
-│   └── test_repository.py      (vide)
-├── integration/
-│   ├── __init__.py
-│   ├── test_login.py           (4 tests — VERT)
-│   ├── test_booking_url.py     (vide)
-│   ├── test_purchase.py        (vide)
-│   └── test_points_public.py   (vide)
-└── fonctionnel/
+.
+├── server.py                   routes Flask
+├── club.py                     MAX_PLACES, find_by_email
+├── repository.py               load_clubs, load_competitions (chemins absolus)
+├── clubs.json
+├── competitions.json
+├── templates/
+│   ├── index.html              connexion + messages flash
+│   ├── welcome.html            tableau de bord
+│   └── booking.html            formulaire d'achat
+├── reproduction_bugs.py        reproduction des anomalies
+├── rapport-de-test.md
+└── test/
     ├── __init__.py
-    └── test_parcours_complet.py (vide)
+    ├── conftest.py             fixtures client + réinitialisation
+    ├── unit/
+    │   ├── __init__.py
+    │   ├── test_club.py            (4 tests — VERT)
+    │   ├── test_competition.py     (vide)
+    │   └── test_repository.py      (3 tests — VERT)
+    ├── integration/
+    │   ├── __init__.py
+    │   ├── test_login.py           (4 tests — VERT)
+    │   ├── test_booking_url.py     (vide)
+    │   ├── test_purchase.py        (vide)
+    │   └── test_points_public.py   (vide)
+    └── fonctionnel/
+        ├── __init__.py
+        └── test_parcours_complet.py (vide)
 ```
 
 ## Annexe C — Glossaire
