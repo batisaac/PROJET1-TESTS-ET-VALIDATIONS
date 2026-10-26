@@ -17,6 +17,16 @@ def client():
         yield c
 
 
+@pytest.fixture
+def connecte(client):
+    """Connecte le client avec l'email indique (Simply Lift par defaut)."""
+    def _connecte(email='john@simplylift.co'):
+        client.post('/showSummary', data={'email': email})
+        return client
+
+    return _connecte
+
+
 @pytest.fixture(autouse=True)
 def donnees_reinitialisees():
     """Recharge les donnees avant chaque test et restaure les fichiers apres.

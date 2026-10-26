@@ -14,14 +14,16 @@ DONNEES_VALIDES = {
 }
 
 
-def test_achat_valide_debute_le_stock(client):
+def test_achat_valide_debute_le_stock(connecte):
+    client = connecte()
     response = client.post('/purchasePlaces', data=DONNEES_VALIDES)
 
     assert response.status_code == 200
     assert b'Number of Places: 24' in response.data
 
 
-def test_competition_inconnue_ne_provoque_pas_d_erreur_serveur(client):
+def test_competition_inconnue_ne_provoque_pas_d_erreur_serveur(connecte):
+    client = connecte()
     data = dict(DONNEES_VALIDES, competition='Fake')
 
     response = client.post('/purchasePlaces', data=data, follow_redirects=True)
@@ -30,7 +32,8 @@ def test_competition_inconnue_ne_provoque_pas_d_erreur_serveur(client):
     assert b'does not exist' in response.data
 
 
-def test_club_inconnu_ne_provoque_pas_d_erreur_serveur(client):
+def test_club_inconnu_ne_provoque_pas_d_erreur_serveur(connecte):
+    client = connecte()
     data = dict(DONNEES_VALIDES, club='Fake')
 
     response = client.post('/purchasePlaces', data=data, follow_redirects=True)
@@ -39,7 +42,8 @@ def test_club_inconnu_ne_provoque_pas_d_erreur_serveur(client):
     assert b'does not exist' in response.data
 
 
-def test_champ_places_absent_ne_provoque_pas_d_erreur_serveur(client):
+def test_champ_places_absent_ne_provoque_pas_d_erreur_serveur(connecte):
+    client = connecte()
     data = {
         'club': 'Simply Lift',
         'competition': 'Spring Festival',
@@ -51,7 +55,8 @@ def test_champ_places_absent_ne_provoque_pas_d_erreur_serveur(client):
     assert b'invalid' in response.data
 
 
-def test_places_non_numerique_ne_provoque_pas_d_erreur_serveur(client):
+def test_places_non_numerique_ne_provoque_pas_d_erreur_serveur(connecte):
+    client = connecte()
     data = dict(DONNEES_VALIDES, places='abc')
 
     response = client.post('/purchasePlaces', data=data, follow_redirects=True)
@@ -61,7 +66,8 @@ def test_places_non_numerique_ne_provoque_pas_d_erreur_serveur(client):
 
 
 @pytest.mark.parametrize('places', ['0', '-5'])
-def test_places_non_positives_refusees(client, places):
+def test_places_non_positives_refusees(connecte, places):
+    client = connecte()
     data = dict(DONNEES_VALIDES, places=places)
 
     response = client.post('/purchasePlaces', data=data)
@@ -71,7 +77,8 @@ def test_places_non_positives_refusees(client, places):
     assert b'Number of Places: 25' in response.data
 
 
-def test_demande_superieure_au_stock_refusee(client):
+def test_demande_superieure_au_stock_refusee(connecte):
+    client = connecte()
     competition = find_by_name(server.competitions, 'Fall Classic')
     competition['numberOfPlaces'] = '5'
     data = {
@@ -87,7 +94,8 @@ def test_demande_superieure_au_stock_refusee(client):
     assert b'Number of Places: 5' in response.data
 
 
-def test_demande_egale_au_stock_acceptee(client):
+def test_demande_egale_au_stock_acceptee(connecte):
+    client = connecte()
     competition = find_by_name(server.competitions, 'Fall Classic')
     competition['numberOfPlaces'] = '5'
     data = {
@@ -103,7 +111,8 @@ def test_demande_egale_au_stock_acceptee(client):
     assert b'Number of Places: 0' in response.data
 
 
-def test_demande_superieure_a_12_places_refusee(client):
+def test_demande_superieure_a_12_places_refusee(connecte):
+    client = connecte()
     data = dict(DONNEES_VALIDES, places='13')
 
     response = client.post('/purchasePlaces', data=data)
@@ -113,7 +122,8 @@ def test_demande_superieure_a_12_places_refusee(client):
     assert b'Number of Places: 25' in response.data
 
 
-def test_demande_de_12_places_acceptee(client):
+def test_demande_de_12_places_acceptee(connecte):
+    client = connecte()
     data = dict(DONNEES_VALIDES, places='12')
 
     response = client.post('/purchasePlaces', data=data)
@@ -123,7 +133,8 @@ def test_demande_de_12_places_acceptee(client):
     assert b'Number of Places: 13' in response.data
 
 
-def test_solde_de_points_insuffisant_refuse(client):
+def test_solde_de_points_insuffisant_refuse(connecte):
+    client = connecte('admin@irontemple.com')
     data = {
         'club': 'Iron Temple',
         'competition': 'Spring Festival',
@@ -138,7 +149,8 @@ def test_solde_de_points_insuffisant_refuse(client):
     assert b'Points available: 4' in response.data
 
 
-def test_achat_debute_les_points_et_confirme_le_nombre(client):
+def test_achat_debute_les_points_et_confirme_le_nombre(connecte):
+    client = connecte('admin@irontemple.com')
     data = {
         'club': 'Iron Temple',
         'competition': 'Spring Festival',
@@ -152,7 +164,8 @@ def test_achat_debute_les_points_et_confirme_le_nombre(client):
     assert b'You have booked 1 place.' in response.data
 
 
-def test_concours_complet_refuse(client):
+def test_concours_complet_refuse(connecte):
+    client = connecte()
     competition = find_by_name(server.competitions, 'Fall Classic')
     competition['numberOfPlaces'] = '0'
     data = {
@@ -168,7 +181,8 @@ def test_concours_complet_refuse(client):
     assert b'Points available: 13' in response.data
 
 
-def test_achat_de_deux_places_debute_deux_points(client):
+def test_achat_de_deux_places_debute_deux_points(connecte):
+    client = connecte()
     data = dict(DONNEES_VALIDES, places='2')
 
     response = client.post('/purchasePlaces', data=data)
@@ -178,7 +192,8 @@ def test_achat_de_deux_places_debute_deux_points(client):
     assert b'You have booked 2 places.' in response.data
 
 
-def test_achat_persiste_les_points_et_le_stock(client):
+def test_achat_persiste_les_points_et_le_stock(connecte):
+    client = connecte()
     response = client.post('/purchasePlaces', data=DONNEES_VALIDES)
 
     assert response.status_code == 200
