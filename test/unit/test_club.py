@@ -1,6 +1,6 @@
 """Tests unitaires de la recherche d'un club."""
 
-from club import find_by_email
+from club import find_by_email, find_by_name
 
 
 def test_find_by_email_trouve_le_club():
@@ -25,3 +25,15 @@ def test_find_by_email_vide_retourne_none():
     clubs = [{'email': 'a@club.com'}]
 
     assert find_by_email(clubs, '') is None
+
+
+def test_find_by_name_trouve_le_club():
+    clubs = [{'name': 'Simply Lift'}, {'name': 'Iron Temple'}]
+
+    assert find_by_name(clubs, 'Iron Temple') == {'name': 'Iron Temple'}
+
+
+def test_find_by_name_inconnu_retourne_none():
+    clubs = [{'name': 'Simply Lift'}]
+
+    assert find_by_name(clubs, 'Fake') is None
