@@ -74,7 +74,25 @@ Merci !
 
     We also like to show how well we're testing, so there's a module called 
     [coverage](https://coverage.readthedocs.io/en/coverage-5.1/) you should add to your project.
-   
+
+    Commandes (Windows, environnement `.venv`) :
+
+    ```cmd
+    .\.venv\Scripts\python.exe -m pytest -v
+    .\.venv\Scripts\python.exe -m pytest --cov=server --cov=repository --cov=club --cov=competition --cov=config --cov=booking --cov-report=term-missing --cov-report=html
+    ```
+
+    Les tests sont séparés en trois niveaux :
+
+    | Dossier | Contenu |
+    |---|---|
+    | `test/unit/` | fonctions pures (`booking`, `club`, `competition`, `config`, `repository`) |
+    | `test/integration/` | routes Flask avec le client de test |
+    | `test/fonctionnel/` | parcours complets de bout en bout |
+
+    Résultat actuel : **70 tests verts**, couverture applicative **100 %**.
+    Le test de charge Locust est décrit plus bas.
+
  6. Flake8 Report 
     
     Commande : `flake8 .` (configuration dans `setup.cfg`, environnement `.venv` exclu)
@@ -84,5 +102,84 @@ Merci !
     ```
 
     Résultat : **0 erreur**.
+
+7. Documentation et liens
+
+    - Rapport de test : [`rapport-de-test.md`](rapport-de-test.md)
+    - Rapport de performances : [`rapport-de-performances.md`](rapport-de-performances.md)
+    - Dépôt : <https://github.com/batisaac/PROJET1-TESTS-ET-VALIDATIONS>
+    - [Flask](https://flask.palletsprojects.com/), [pytest](https://docs.pytest.org/),
+      [pytest-cov](https://pytest-cov.readthedocs.io/), [Locust](https://docs.locust.io/),
+      [Flake8](https://flake8.pycqa.org/)
+
+    Le rapport de test contient l'inventaire des anomalies (B1 à B24), leur reproduction,
+    les tests associés (T-U, T-I, T-F), la couverture, Flake8 et les limites connues.
+    Le rapport de performances contient le protocole Locust et les mesures.
+
+8. Configuration
+
+    | Élément | Valeur |
+    |---|---|
+    | Python | 3.14 |
+    | Flask | 3.1.3 |
+    | pytest / pytest-cov | 9.1.1 / 7.1.0 |
+    | Flake8 | 7.4.1 (limite 99, `.venv` exclu) |
+    | Locust | 2.47.0 |
+
+    - Installer les dépendances : `.\.venv\Scripts\python.exe -m pip install -r requirements.txt`
+    - Lancer le serveur : `.\.venv\Scripts\python.exe -m flask --app server run`
+    - Clé de session : variable d'environnement `SECRET_KEY`. Si elle est absente, une clé
+      aléatoire est générée au démarrage (les sessions sont alors perdues au redémarrage).
+    - Données : `clubs.json` et `competitions.json`, réécrits après chaque achat.
+    - Test de charge :
+
+      ```cmd
+      .\.venv\Scripts\python.exe -m flask --app server run --port 5011
+      .\.venv\Scripts\locust.exe -f locustfile.py --headless -u 6 -r 6 -t 30s --host http://127.0.0.1:5011
+      git checkout -- clubs.json competitions.json
+      ```
+
+      La dernière commande restaure les données, car les achats simulés les modifient.
+
+9. Conventions de développement
+
+    - Une branche par anomalie ou fonctionnalité : `<type>/<nom-descriptif>`
+      (`bug/`, `refactor/`, `chore/`, `feature/`, `test/`, `perf/`, `docs/`).
+    - TDD : écrire le test (rouge), écrire le minimum de code (vert), puis refactorer.
+    - Commits : `type: description (Bxx)` quand un identifiant d'anomalie existe.
+    - `main` reste la source de vérité ; chaque branche est poussée puis fusionnée en
+      avance rapide (`git merge --ff-only`).
+    - La branche `QA` est créée depuis `main` en fin de projet et **n'est jamais fusionnée**.
+    - Logique métier dans des fonctions pures (`booking.py`, `club.py`, `competition.py`,
+      `repository.py`) ; les routes appliquent les effets de bord.
+    - Tests nommés en français, identifiants T-U (unitaire), T-I (intégration),
+      T-F (fonctionnel).
+
+10. FAQ
+
+    **Pourquoi le tableau de bord est-il vide après connexion ?**
+    Les compétitions fournies sont datées de 2020. L'application n'affiche que les
+    compétitions à venir (exigence B23) ; mettez une date future dans `competitions.json`
+    pour les voir.
+
+    **Pourquoi un achat est-il refusé ?**
+    Cinq règles sont vérifiées dans cet ordre : quantité ≥ 1, concours complet, stock
+    suffisant, maximum 12 places par achat, solde de points suffisant. Le message affiché
+    indique la règle concernée.
+
+    **Pourquoi « Sorry, you must be logged in. » ?**
+    `/book` et `/purchasePlaces` exigent une session ouverte via `/showSummary`, et le club
+    du formulaire doit être celui de la session.
+
+    **Comment restaurer les données d'origine ?**
+    `git checkout -- clubs.json competitions.json`.
+
+    **Pourquoi ne pas lancer deux `pytest` en parallèle ?**
+    Les tests de persistance écrivent dans les vrais fichiers JSON, restaurés par la fixture.
+    Deux exécutions simultanées se marcheraient dessus.
+
+    **Où sont les preuves ?**
+    `rapport-de-test.md`, `rapport-de-performances.md`, `reproduction_bugs.py` et l'historique
+    Git (une branche par anomalie).
 
 
