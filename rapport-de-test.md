@@ -1,11 +1,11 @@
 # Rapport de test — GUDLFT
 
-> Version 1.5 — 2026-10-26
+> Version 1.6 — 2026-10-26
 > Auteur : Isaac Batoua (`batisaac`)
 > Dépôt : <https://github.com/batisaac/PROJET1-TESTS-ET-VALIDATIONS>
-> Branche courante : `bug/places-invalides` (depuis `main` @ `eb08e43`)
+> Branche courante : `main` @ `8505725`
 
-**État d'avancement : phase 1 en cours — 5 groupes d'anomalies traités (13 anomalies corrigées sur 26).**
+**État d'avancement : phase 1 en cours — 6 groupes d'anomalies traités (15 anomalies corrigées sur 26).**
 Les sections marquées *(à compléter)* le seront au fur et à mesure ; ce document ne
 contient aucun résultat non mesuré.
 
@@ -159,16 +159,16 @@ la branche `QA` sera créée depuis `main` en fin de projet et **ne sera jamais 
 | Champ `places` absent | T-I11 | **écrit, VERT** |
 | `places` non numérique | T-I12 | **écrit, VERT** |
 | `places` ≤ 0 | T-I13 | **écrit, VERT** |
-| Plus de 12 places | T-I14 | à écrire |
-| Plus de places disponibles | T-I15 | à écrire |
-| Solde de points insuffisant | T-I16 | à écrire |
-| Déduction des points | T-I17 | à écrire |
-| Concours complet | T-I18 | à écrire |
-| Message avec le nombre de places | T-I19 | à écrire |
-| Persistance JSON | T-I20 | à écrire |
-| Déconnexion effective | T-I21 | à écrire |
-| Tableau public sans connexion (phase 2) | T-I22 | à écrire |
-| Contenu du tableau public (phase 2) | T-I23 | à écrire |
+| Plus de places disponibles | T-I14, T-I15 | **écrit, VERT** |
+| Plus de 12 places | T-I16, T-I17 | **écrit, VERT** |
+| Solde de points insuffisant | T-I18 | à écrire |
+| Déduction des points | T-I19 | à écrire |
+| Concours complet | T-I20 | à écrire |
+| Message avec le nombre de places | T-I21 | à écrire |
+| Persistance JSON | T-I22 | à écrire |
+| Déconnexion effective | T-I23 | à écrire |
+| Tableau public sans connexion (phase 2) | T-I24 | à écrire |
+| Contenu du tableau public (phase 2) | T-I25 | à écrire |
 
 ---
 
@@ -300,8 +300,8 @@ Les numéros de ligne cités (`server.py:29/35/36/46/47/48`) sont ceux du code d
 |---|---|---|---|---|---|
 | **B10** | `server.py:49` | Points déduits du total | Points jamais débités | manuel | à corriger |
 | **B11** | `server.py:45-51` | Refus si points insuffisants | Aucun contrôle (Iron Temple : 4 points, 5 places) | auto | à corriger |
-| **B12** | `server.py:45-51` | 12 places maximum | Aucun contrôle (20 places acceptées) | auto | à corriger |
-| **B13** | `server.py:49` | Pas plus que les places disponibles | Compteur négatif (13 → −986) | auto + manuel | à corriger |
+| **B12** | `server.py:45-51` | 12 places maximum | Aucun contrôle (20 places acceptées) | auto | **corrigé** |
+| **B13** | `server.py:49` | Pas plus que les places disponibles | Compteur négatif (13 → −986) | auto + manuel | **corrigé** |
 | **B14** | `server.py:50` | Message « concours complet » | Toujours `Great-booking complete!` | manuel | à corriger |
 | **B15** | `server.py:50` | Message avec le nombre de places | Message générique | manuel | à corriger |
 | **B16** | `server.py:48-49` | Quantité entière ≥ 1 | `-5` accepté (le stock augmente), `0` accepté | auto | **corrigé** |
@@ -331,10 +331,10 @@ Les numéros de ligne cités (`server.py:29/35/36/46/47/48`) sont ceux du code d
 | Catégorie | Nombre | Corrigées |
 |---|---|---|
 | Crashs / entrées invalides | 11 | 11 (B1 à B9, B5bis) |
-| Règles métier | 7 | 1 (B16) |
+| Règles métier | 7 | 3 (B12, B13, B16) |
 | Robustesse / sécurité / testabilité | 6 | 1 (B18) |
 | Interface / fonctionnalités | 2 | 0 |
-| **Total** | **26** | **13** |
+| **Total** | **26** | **15** |
 
 Reproduction : 14 anomalies via script + 4 via navigateur = **18 constatées** ; 8 identifiées par audit.
 
@@ -346,9 +346,9 @@ Trois dossiers de tests sont actifs à ce stade :
 
 - `test/integration/test_login.py` (4 tests, T-I01 à T-I04) ;
 - `test/integration/test_booking_url.py` (4 tests, T-I05 à T-I07b) ;
-- `test/integration/test_purchase.py` (7 cas, T-I08 à T-I13) ;
+- `test/integration/test_purchase.py` (11 cas, T-I08 à T-I17) ;
 - `test/unit/` : `test_club.py`, `test_competition.py`, `test_repository.py`
-  et `test_booking.py` (18 tests, T-U01 à T-U18).
+  et `test_booking.py` (22 tests, T-U01 à T-U21).
 
 Les fichiers `test/integration/test_points_public.py` et
 `test/fonctionnel/test_parcours_complet.py` sont créés mais **vides** (backlog §9).
@@ -362,14 +362,14 @@ python -m pytest -v
 **Résultat actuel :**
 
 ```text
-test/integration/test_booking_url.py ....               [ 12%]
-test/integration/test_login.py ....                     [ 24%]
-test/integration/test_purchase.py .......               [ 45%]
-test/unit/test_booking.py .......                       [ 66%]
-test/unit/test_club.py ......                           [ 84%]
-test/unit/test_competition.py ..                        [ 90%]
+test/integration/test_booking_url.py ....               [  9%]
+test/integration/test_login.py ....                     [ 19%]
+test/integration/test_purchase.py ...........           [ 46%]
+test/unit/test_booking.py ...........                   [ 73%]
+test/unit/test_club.py ......                           [ 87%]
+test/unit/test_competition.py ..                        [ 92%]
 test/unit/test_repository.py ...                        [100%]
-============================= 33 passed in 0.12s ==============================
+============================= 41 passed in 1.00s ==============================
 ```
 
 **Preuve TDD (test de connexion, avant correction) :**
@@ -406,6 +406,10 @@ pytest échouait au chargement avec `ModuleNotFoundError: No module named 'repos
 | T-I11 | `test_champ_places_absent_ne_provoque_pas_d_erreur_serveur` | Intégration (sad) | 200 + `invalid` (B8) | VERT |
 | T-I12 | `test_places_non_numerique_ne_provoque_pas_d_erreur_serveur` | Intégration (sad) | 200 + `invalid` (B9) | VERT |
 | T-I13 | `test_places_non_positives_refusees` (0 et -5) | Intégration (sad) | message + stock inchangé (B16) | VERT |
+| T-I14 | `test_demande_superieure_au_stock_refusee` | Intégration (sad) | 200 + message + stock inchangé (B13) | VERT |
+| T-I15 | `test_demande_egale_au_stock_acceptee` | Intégration (happy) | 200 + stock 0 (limite B13) | VERT |
+| T-I16 | `test_demande_superieure_a_12_places_refusee` | Intégration (sad) | message + stock inchangé (B12) | VERT |
+| T-I17 | `test_demande_de_12_places_acceptee` | Intégration (happy) | 200 + stock 13 (limite B12) | VERT |
 | T-U01 | `test_load_clubs_lit_les_trois_clubs` | Unitaire | 3 clubs, premier = Simply Lift | VERT |
 | T-U02 | `test_load_competitions_lit_les_deux_competitions` | Unitaire | 2 compétitions, première = Spring Festival | VERT |
 | T-U03 | `test_load_clubs_fonctionne_depuis_un_autre_repertoire` | Unitaire | chargement indépendant du répertoire courant (B18) | VERT |
@@ -423,8 +427,12 @@ pytest échouait au chargement avec `ModuleNotFoundError: No module named 'repos
 | T-U15 | `test_parse_places_absent_retourne_none` | Unitaire | `None` → `None` (B8) | VERT |
 | T-U16 | `test_validate_refuse_quantite_non_positive` (0, -5) | Unitaire | message « at least one place » (B16) | VERT |
 | T-U17 | `test_validate_accepte_quantite_positive` | Unitaire | `1` → `None` (aucune erreur) | VERT |
+| T-U18 | `test_validate_refuse_demande_superieure_au_stock` | Unitaire | stock 3, demande 4 → message (B13) | VERT |
+| T-U19 | `test_validate_accepte_demande_egale_au_stock` | Unitaire | stock 3, demande 3 → `None` (limite B13) | VERT |
+| T-U20 | `test_validate_accepte_douze_places` | Unitaire | 12 places → `None` (limite B12) | VERT |
+| T-U21 | `test_validate_refuse_plus_de_douze_places` | Unitaire | 13 places → message (B12) | VERT |
 
-Répartition : **18 unitaires / 15 intégration** — les tests fonctionnels viendront après les
+Répartition : **22 unitaires / 19 intégration** — les tests fonctionnels viendront après les
 corrections métier (§9).
 
 ---
@@ -433,12 +441,12 @@ corrections métier (§9).
 
 | Fichier | Tests prévus |
 |---|---|
-| `test/unit/test_club.py` | débit de points, solde suffisant, limite de 12 |
+| `test/unit/test_club.py` | débit de points, solde suffisant |
 | `test/unit/test_competition.py` | places disponibles, concours complet, places suffisantes, date passée/future |
 | `test/unit/test_repository.py` | écriture JSON, fichier absent, JSON corrompu |
 | `test/integration/test_booking_url.py` | — (complet) |
-| `test/integration/test_purchase.py` | T-I14 à T-I21 (stock, quota, points, persistance, déconnexion) |
-| `test/integration/test_points_public.py` | T-I22, T-I23 (phase 2) |
+| `test/integration/test_purchase.py` | T-I18 à T-I23 (points, concours complet, persistance, déconnexion) |
+| `test/integration/test_points_public.py` | T-I24, T-I25 (phase 2) |
 | `test/fonctionnel/test_parcours_complet.py` | parcours complet, limite de 12, stock épuisé, consultation publique |
 | `locustfile.py` | charge 6 utilisateurs, seuils 5 s / 2 s |
 
@@ -567,12 +575,43 @@ modifier le stock. Les règles suivantes seront ajoutées à cette même fonctio
 |---|---|---|
 | B16 | aucune validation de la quantité | T-I13, T-U16, T-U17 |
 
-### 10.6 Autres branches
+### 10.6 Branche `bug/sur-reservation` — B13
+
+```python
+if places > int(competition['numberOfPlaces']):
+    return 'Sorry, there are not enough places available.'
+```
+
+`int(...)` convertit la chaîne JSON (`"13"`) avant comparaison. En cas de refus, la route
+réaffiche le tableau de bord et le stock reste inchangé.
+
+| Anomalie | Cause traitée | Tests |
+|---|---|---|
+| B13 | stock non vérifié (stock négatif possible) | T-I14, T-I15, T-U18, T-U19 |
+
+### 10.7 Branche `bug/limite-12-places` — B12
+
+`MAX_PLACES` (déjà défini dans `club.py`) est enfin utilisé ; le message est construit à
+partir de la constante :
+
+```python
+from club import MAX_PLACES
+
+if places > MAX_PLACES:
+    return (
+        f'Sorry, you cannot book more than {MAX_PLACES} places '
+        'per competition.'
+    )
+```
+
+| Anomalie | Cause traitée | Tests |
+|---|---|---|
+| B12 | quota de 12 places non appliqué | T-I16, T-I17, T-U20, T-U21 |
+
+### 10.8 Autres branches
 
 | Anomalies | Branche prévue | État |
 |---|---|---|
-| B13 | `bug/sur-reservation` | à faire |
-| B12 | `bug/limite-12-places` | à faire |
 | B10, B11, B14, B15 | `bug/points-et-messages` | à faire |
 | B17 | `bug/persistance-json` | à faire |
 | B19 à B22 | `bug/robustesse-securite` | à faire |
@@ -595,14 +634,14 @@ python -m pytest --cov=server --cov=repository --cov=club --cov=competition --co
 ```text
 Name             Stmts   Miss  Cover   Missing
 ----------------------------------------------
-booking.py           9      0   100%
+booking.py          14      0   100%
 club.py              6      0   100%
 competition.py       2      0   100%
 repository.py       11      0   100%
 server.py           48      1    98%   67
 ----------------------------------------------
-TOTAL               76      1    99%
-33 passed in 0.17s
+TOTAL               81      1    99%
+41 passed in 1.59s
 ```
 
 | Fichier | % | Lignes non couvertes |
@@ -615,8 +654,8 @@ TOTAL               76      1    99%
 | **Total** | **99 %** | objectif ≥ 60 % largement atteint |
 
 **Analyse** : seule la route `/logout` reste non couverte. Attention : ces 99 % mesurent
-l'**exécution**, pas le respect des règles métier — les contrôles de points, de quota et de
-stock ne sont pas encore implémentés (branches suivantes).
+l'**exécution**, pas le respect des règles métier — les contrôles de points et de concours
+complet ne sont pas encore implémentés (branche suivante).
 
 ---
 
@@ -634,12 +673,12 @@ limite par défaut de 79 caractères).
 ```text
 12    E231 missing whitespace after ','
 2     E302 expected 2 blank lines, found 1
-8     E501 line too long (> 79 characters)
+9     E501 line too long (> 79 characters)
 ```
 
 | Fichier | Erreurs |
 |---|---|
-| `server.py` | 17 (E231, E302, E501) |
+| `server.py` | 18 (12 E231, 2 E302, 4 E501) |
 | `test/integration/test_booking_url.py` | 2 (E501) |
 | `test/integration/test_login.py` | 1 (E501 ligne 5) |
 | `test/unit/test_competition.py` | 1 (E501) |
@@ -647,7 +686,8 @@ limite par défaut de 79 caractères).
 | `repository.py`, `club.py`, `competition.py`, `booking.py` | 0 |
 
 Les erreurs `E111`, `E117` et `W292` de l'état initial (indentation et fin de fichier) ont
-disparu avec la réécriture de `server.py`.
+disparu avec la réécriture de `server.py`. Les branches B12 et B13 n'ont ajouté aucune
+erreur.
 
 **État : non conforme.** Objectif : `flake8 .` sans erreur, via la branche
 `chore/qualite-flake8` (formatage + `setup.cfg` avec `max-line-length = 99`).
@@ -664,7 +704,7 @@ La section 6 « Flake8 Report » du `README.md` sera remplie à ce moment-là.
 | Route `GET /points` | accessible sans connexion | à faire |
 | Template `templates/points.html` | tableau club / points, lecture seule | à faire |
 | Lien depuis `index.html` | navigation publique | à faire |
-| T-I22, T-I23 | 200 sans session + contenu exact | à écrire |
+| T-I24, T-I25 | 200 sans session + contenu exact | à écrire |
 | Performance < 2 s | mesure Locust | à faire |
 
 ---
@@ -680,24 +720,25 @@ La section 6 « Flake8 Report » du `README.md` sera remplie à ce moment-là.
 | 5 | `coverage` mesure l'exécution, pas la qualité des assertions | Chaque fonctionnalité testée en happy + sad path |
 | 6 | Locust mesurerait le serveur de développement Flask, pas un serveur de production | Résultats indicatifs ; seuils (5 s / 2 s) très larges |
 | 7 | Le client de test Flask ne teste pas le JavaScript (ex. blocage de `abc` par `<input type="number">`) | D'où l'importance de la validation serveur (T-I12) |
-| 8 | Les tests unitaires sont écrits au fil des branches, pas en bloc final | Répartition actuelle : 15 unitaires / 13 intégration |
+| 8 | Les tests unitaires sont écrits au fil des branches, pas en bloc final | Répartition actuelle : 22 unitaires / 19 intégration |
 
 ---
 
 ## 15. Conclusion
 
-**État actuel** : **28 tests écrits, 28 verts** (15 unitaires, 13 intégration).
-Anomalies corrigées : **12 sur 26** — connexion (B1, B2, B2b), chemins JSON (B18),
-page de réservation (B3, B4, B5, B5bis) et formulaire d'achat (B6, B7, B8, B9).
+**État actuel** : **41 tests écrits, 41 verts** (22 unitaires, 19 intégration).
+Anomalies corrigées : **15 sur 26** — connexion (B1, B2, B2b), chemins JSON (B18),
+page de réservation (B3, B4, B5, B5bis), formulaire d'achat (B6, B7, B8, B9),
+quantités non positives (B16), stock (B13) et quota de 12 places (B12).
 
-**Reste à faire** en phase 1 : 14 anomalies (règles métier, persistance, sécurité, interface), puis Flake8.
+**Reste à faire** en phase 1 : 11 anomalies (points, messages, persistance, sécurité, interface), puis Flake8.
 **Phase 2** : non commencée.
 
 Points d'attention confirmés par les mesures :
 - la couverture globale est de **99 %**, mais elle mesure l'exécution, pas les règles métier ;
-- le code n'est **pas conforme Flake8** (22 erreurs restantes) ;
-- aucune règle métier n'est encore appliquée : `-5` places, 20 places, stock épuisé et solde
-  insuffisant sont toujours acceptés ;
+- le code n'est **pas conforme Flake8** (23 erreurs restantes) ;
+- les points ne sont toujours ni contrôlés ni débités (B10, B11), et les messages
+  « concours complet » / « nombre de places » manquent (B14, B15) ;
 - l'absence de persistance (**B17**) reste l'anomalie la plus structurante.
 
 ---
@@ -716,8 +757,8 @@ python -m pytest test/unit -v
 python -m pytest test/integration -v
 python -m pytest test/fonctionnel -v
 
-python -m pytest --cov=server --cov=repository --cov=club --cov-report=term-missing --cov-report=html
-python -m flake8 server.py repository.py club.py test/ --statistics
+python -m pytest --cov=server --cov=repository --cov=club --cov=competition --cov=booking --cov-report=term-missing --cov-report=html
+python -m flake8 server.py repository.py club.py competition.py booking.py test/ --statistics
 ```
 
 ## Annexe B — Arborescence
@@ -727,7 +768,7 @@ python -m flake8 server.py repository.py club.py test/ --statistics
 ├── server.py                   routes Flask
 ├── club.py                     MAX_PLACES, find_by_email, find_by_name
 ├── competition.py              find_by_name
-├── booking.py                  parse_places
+├── booking.py                  parse_places, validate_purchase
 ├── repository.py               load_clubs, load_competitions (chemins absolus)
 ├── clubs.json
 ├── competitions.json
@@ -742,7 +783,7 @@ python -m flake8 server.py repository.py club.py test/ --statistics
     ├── conftest.py             fixtures client + réinitialisation
     ├── unit/
     │   ├── __init__.py
-    │   ├── test_booking.py         (4 tests — VERT)
+    │   ├── test_booking.py         (11 tests — VERT)
     │   ├── test_club.py            (6 tests — VERT)
     │   ├── test_competition.py     (2 tests — VERT)
     │   └── test_repository.py      (3 tests — VERT)
@@ -750,7 +791,7 @@ python -m flake8 server.py repository.py club.py test/ --statistics
     │   ├── __init__.py
     │   ├── test_login.py           (4 tests — VERT)
     │   ├── test_booking_url.py     (4 tests — VERT)
-    │   ├── test_purchase.py        (5 tests — VERT)
+    │   ├── test_purchase.py        (11 tests — VERT)
     │   └── test_points_public.py   (vide)
     └── fonctionnel/
         ├── __init__.py
