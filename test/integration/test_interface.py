@@ -32,3 +32,15 @@ def test_page_accueil_associe_le_label_et_le_champ(client):
 
     assert b'id="email"' in response.data
     assert b'id=""' not in response.data
+
+
+def test_feuille_de_style_est_servie_et_referencee(client):
+    """T-I34 : le CSS de la refonte est servi et charge par les pages."""
+    response = client.get('/static/css/gudlft.css')
+
+    assert response.status_code == 200
+    assert response.mimetype == 'text/css'
+    assert b'--rouge' in response.data
+    assert b'/static/css/gudlft.css' in client.get('/').data
+    assert b'data-testid="login-form"' in client.get('/').data
+    assert b'data-testid="points-table"' in client.get('/points').data
