@@ -19,7 +19,8 @@ def test_achat_valide_debute_le_stock(connecte):
     response = client.post('/purchasePlaces', data=DONNEES_VALIDES)
 
     assert response.status_code == 200
-    assert b'Number of Places: 24' in response.data
+    competition = find_by_name(server.competitions, 'Spring Festival')
+    assert competition['numberOfPlaces'] == 24
 
 
 def test_competition_inconnue_ne_provoque_pas_d_erreur_serveur(connecte):
@@ -74,7 +75,8 @@ def test_places_non_positives_refusees(connecte, places):
 
     assert response.status_code == 200
     assert b'at least one place' in response.data
-    assert b'Number of Places: 25' in response.data
+    competition = find_by_name(server.competitions, 'Spring Festival')
+    assert competition['numberOfPlaces'] == '25'
 
 
 def test_demande_superieure_au_stock_refusee(connecte):
@@ -91,7 +93,7 @@ def test_demande_superieure_au_stock_refusee(connecte):
 
     assert response.status_code == 200
     assert b'not enough places' in response.data
-    assert b'Number of Places: 5' in response.data
+    assert competition['numberOfPlaces'] == '5'
 
 
 def test_demande_egale_au_stock_acceptee(connecte):
@@ -108,7 +110,7 @@ def test_demande_egale_au_stock_acceptee(connecte):
 
     assert response.status_code == 200
     assert b'Great-booking complete!' in response.data
-    assert b'Number of Places: 0' in response.data
+    assert competition['numberOfPlaces'] == 0
 
 
 def test_demande_superieure_a_12_places_refusee(connecte):
@@ -119,7 +121,8 @@ def test_demande_superieure_a_12_places_refusee(connecte):
 
     assert response.status_code == 200
     assert b'more than 12 places' in response.data
-    assert b'Number of Places: 25' in response.data
+    competition = find_by_name(server.competitions, 'Spring Festival')
+    assert competition['numberOfPlaces'] == '25'
 
 
 def test_demande_de_12_places_acceptee(connecte):
@@ -130,7 +133,8 @@ def test_demande_de_12_places_acceptee(connecte):
 
     assert response.status_code == 200
     assert b'Great-booking complete!' in response.data
-    assert b'Number of Places: 13' in response.data
+    competition = find_by_name(server.competitions, 'Spring Festival')
+    assert competition['numberOfPlaces'] == 13
 
 
 def test_solde_de_points_insuffisant_refuse(connecte):
@@ -145,7 +149,8 @@ def test_solde_de_points_insuffisant_refuse(connecte):
 
     assert response.status_code == 200
     assert b'do not have enough points' in response.data
-    assert b'Number of Places: 25' in response.data
+    competition = find_by_name(server.competitions, 'Spring Festival')
+    assert competition['numberOfPlaces'] == '25'
     assert b'Points available: 4' in response.data
 
 

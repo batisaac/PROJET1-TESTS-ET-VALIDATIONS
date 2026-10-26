@@ -9,8 +9,9 @@ from flask import (
 )
 
 from booking import confirmation_message, parse_places, validate_purchase
-from club import find_by_email, find_by_name as find_club_by_name
+from club import MAX_PLACES, find_by_email, find_by_name as find_club_by_name
 from competition import find_by_name as find_competition_by_name
+from competition import upcoming
 from config import secret_key
 from repository import (
     load_clubs,
@@ -38,6 +39,10 @@ def refuser_sans_session():
     flash('Sorry, you must be logged in.')
     return redirect(url_for('index'))
 
+
+def competitions_a_venir():
+    return upcoming(competitions)
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -49,7 +54,11 @@ def showSummary():
         flash('Sorry, that email is not registered.')
         return render_template('index.html'), 200
     session['email'] = club['email']
-    return render_template('welcome.html',club=club,competitions=competitions)
+    return render_template(
+        'welcome.html',
+        club=club,
+        competitions=competitions_a_venir(),
+    )
 
 
 @app.route('/book/<competition>/<club>')
@@ -65,7 +74,12 @@ def book(competition,club):
     if foundClub['name'] != clubSession['name']:
         flash("Sorry, you cannot book for another club.")
         return redirect(url_for('index'))
-    return render_template('booking.html',club=foundClub,competition=foundCompetition)
+    return render_template(
+        'booking.html',
+        club=foundClub,
+        competition=foundCompetition,
+        max_places=MAX_PLACES,
+    )
 
 
 @app.route('/purchasePlaces',methods=['POST'])
@@ -91,7 +105,11 @@ def purchasePlaces():
     error = validate_purchase(foundClub, foundCompetition, placesRequired)
     if error is not None:
         flash(error)
-        return render_template('welcome.html', club=foundClub, competitions=competitions)
+        return render_template(
+            'welcome.html',
+            club=foundClub,
+            competitions=competitions_a_venir(),
+        )
 
     foundCompetition['numberOfPlaces'] = int(foundCompetition['numberOfPlaces'])-placesRequired
     foundClub['points'] = int(foundClub['points'])-placesRequired
