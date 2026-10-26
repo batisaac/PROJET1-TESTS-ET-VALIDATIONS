@@ -1,19 +1,96 @@
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Booking for {{competition['name']}} || GUDLFT</title>
-</head>
-<body>
-    <h2>{{competition['name']}}</h2>
-    Places available: {{competition['numberOfPlaces']}}
-    <form action="/purchasePlaces" method="post">
-        <input type="hidden" name="club" value="{{club['name']}}">
-        <input type="hidden" name="competition" value="{{competition['name']}}">
-        <label for="places">How many places?</label>
-        <input type="number" name="places" id="places"
-               min="1" max="{{ max_places }}"/>
-        <button type="submit">Book</button>
-    </form>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}Réserver — {{ competition['name'] }} — GUDLFT{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb-line" aria-label="Fil d'Ariane">
+    <a href="{{ url_for('index') }}">Accueil</a>
+    <span aria-hidden="true">/</span>
+    <span>Réservation</span>
+</nav>
+
+<div class="page-head">
+    <p class="eyebrow tw-mb-1">Réservation</p>
+    <h1 class="page-title">Réserver des places</h1>
+    <p class="page-intro">Choisissez votre nombre de places, puis confirmez votre réservation.</p>
+</div>
+
+<div class="row g-4 align-items-start">
+    <div class="col-12 col-lg-5">
+        <section class="card panel booking-summary" data-testid="booking-summary">
+            <p class="eyebrow tw-mb-1">Compétition</p>
+            <h2>{{ competition['name'] }}</h2>
+
+            <p class="competition-card__date mb-4">
+                <i class="bi bi-calendar3" aria-hidden="true"></i>
+                <span>{{ competition['date'] }}</span>
+            </p>
+
+            <p class="data-line" lang="en">Places available: {{ competition['numberOfPlaces'] }}</p>
+
+            <section class="scoreboard scoreboard--compact"
+                     data-points-label="Points available: {{ club['points'] }}"
+                     data-testid="booking-balance">
+                <p class="scoreboard__label">Votre solde</p>
+                <p class="scoreboard__value">{{ club['points'] }}</p>
+                <p class="scoreboard__hint">1 place = 1 point</p>
+            </section>
+        </section>
+    </div>
+
+    <div class="col-12 col-lg-7">
+        <section class="card panel">
+            <h2 class="h3 mb-4">Votre réservation</h2>
+
+            <form action="/purchasePlaces"
+                  method="post"
+                  data-testid="booking-form"
+                  data-max="{{ max_places }}"
+                  data-points="{{ club['points'] }}">
+                <input type="hidden" name="club" value="{{ club['name'] }}">
+                <input type="hidden" name="competition" value="{{ competition['name'] }}">
+
+                <div class="mb-3">
+                    <label for="places" class="form-label">Combien de places ?</label>
+                    <input type="number"
+                           name="places"
+                           id="places"
+                           min="1"
+                           max="{{ max_places }}"
+                           class="form-control form-control-lg"
+                           inputmode="numeric"
+                           aria-describedby="places-help"
+                           required
+                           data-testid="places-input">
+                    <div id="places-help" class="form-text">
+                        Maximum {{ max_places }} places par achat. 1 place = 1 point.
+                    </div>
+                </div>
+
+                <p class="booking-counter"
+                   data-testid="places-counter"
+                   aria-live="polite">Saisissez un nombre de places.</p>
+
+                <button type="submit"
+                        class="btn btn-brand btn-lg w-100 tw-inline-flex tw-items-center tw-justify-center tw-gap-2"
+                        data-testid="booking-submit">
+                    <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                    Confirmer la réservation
+                </button>
+
+                <p class="booking-note">
+                    Le montant en points est débité immédiatement après confirmation.
+                </p>
+            </form>
+
+            <form action="{{ url_for('showSummary') }}" method="post" class="booking-back">
+                <input type="hidden" name="email" value="{{ session.get('email', '') }}">
+                <button type="submit" class="btn btn-link w-100">
+                    <i class="bi bi-arrow-left" aria-hidden="true"></i>
+                    Retour au tableau de bord
+                </button>
+            </form>
+        </section>
+    </div>
+</div>
+{% endblock %}

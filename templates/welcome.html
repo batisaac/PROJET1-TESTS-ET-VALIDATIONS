@@ -1,36 +1,55 @@
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Summary | GUDLFT Registration</title>
-</head>
-<body>
-        <h2>Welcome, {{club['email']}} </h2><a href="{{url_for('logout')}}">Logout</a>
+{% extends 'base.html' %}
+{% from '_macros.html' import carte_competition with context %}
 
-    {% with messages = get_flashed_messages()%}
-    {% if messages %}
-        <ul>
-       {% for message in messages %}
-            <li>{{message}}</li>
-        {% endfor %}
-       </ul>
-    {% endif%}
-    Points available: {{club['points']}}
-    <h3>Competitions:</h3>
-    <ul>
-        {% for comp in competitions%}
-        <li>
-            {{comp['name']}}<br />
-            Date: {{comp['date']}}<br />
-            Number of Places: {{comp['numberOfPlaces']}}
-            {%if comp['numberOfPlaces']|int >0%}
-            <a href="{{ url_for('book',competition=comp['name'],club=club['name']) }}">Book Places</a>
-            {%endif%}
-        </li>
-        <hr />
-        {% endfor %}
-    </ul>
-    {%endwith%}
+{% block title %}Tableau de bord — GUDLFT{% endblock %}
 
-</body>
-</html>
+{% block content %}
+<section data-testid="dashboard">
+    <div class="row g-4 align-items-stretch mb-5">
+        <div class="col-12 col-lg-7">
+            <div class="h-100 d-flex flex-column justify-content-center">
+                <p class="eyebrow tw-mb-1">Espace secrétaire</p>
+                <h1 class="page-title">Tableau de bord</h1>
+                <p class="welcome-line">Welcome, {{ club['email'] }}</p>
+            </div>
+        </div>
+        <div class="col-12 col-lg-5">
+            <section class="scoreboard"
+                     data-points-label="Points available: {{ club['points'] }}"
+                     data-testid="points-balance">
+                <p class="scoreboard__label">Solde du club</p>
+                <p class="scoreboard__value">{{ club['points'] }}</p>
+                <p class="scoreboard__hint">1 point = 1 place</p>
+            </section>
+        </div>
+    </div>
+
+    <div class="section-head">
+        <div>
+            <p class="eyebrow tw-mb-1">Calendrier</p>
+            <h2 class="section-title">Compétitions à venir</h2>
+        </div>
+        <a class="btn btn-ghost" href="{{ url_for('points') }}">
+            <i class="bi bi-trophy" aria-hidden="true"></i>
+            Points publics
+        </a>
+    </div>
+
+    {% if competitions %}
+        <div class="row row-cols-1 row-cols-lg-2 g-4" data-testid="competition-list">
+            {% for competition in competitions %}
+                <div class="col">
+                    {{ carte_competition(competition, club) }}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state" data-testid="empty-competitions">
+            <i class="bi bi-calendar-x empty-state__icon" aria-hidden="true"></i>
+            <h2>Aucune compétition à venir</h2>
+            <p>Le calendrier sera publié prochainement. Consultez le classement des clubs en attendant.</p>
+            <a class="btn btn-ghost mt-3" href="{{ url_for('points') }}">Voir les points publics</a>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}
