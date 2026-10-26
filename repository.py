@@ -13,11 +13,29 @@ CLUBS_FILE = BASE_DIR / 'clubs.json'
 COMPETITIONS_FILE = BASE_DIR / 'competitions.json'
 
 
-def load_clubs():
-    with open(CLUBS_FILE, encoding='utf-8') as fichier:
+def load_clubs(path=None):
+    with open(path or CLUBS_FILE, encoding='utf-8') as fichier:
         return json.load(fichier)['clubs']
 
 
-def load_competitions():
-    with open(COMPETITIONS_FILE, encoding='utf-8') as fichier:
+def load_competitions(path=None):
+    with open(path or COMPETITIONS_FILE, encoding='utf-8') as fichier:
         return json.load(fichier)['competitions']
+
+
+def save_clubs(clubs, path=None):
+    """Ecrit la liste des clubs dans le fichier JSON (atomiquement)."""
+    _write({'clubs': clubs}, path or CLUBS_FILE)
+
+
+def save_competitions(competitions, path=None):
+    """Ecrit la liste des competitions dans le fichier JSON."""
+    _write({'competitions': competitions}, path or COMPETITIONS_FILE)
+
+
+def _write(data, path):
+    path = Path(path)
+    temporaire = path.with_name(path.name + '.tmp')
+    with open(temporaire, 'w', encoding='utf-8') as fichier:
+        json.dump(data, fichier, indent=4, ensure_ascii=False)
+    temporaire.replace(path)

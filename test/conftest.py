@@ -1,7 +1,12 @@
 import pytest
 
 import server
-from repository import load_clubs, load_competitions
+from repository import (
+    CLUBS_FILE,
+    COMPETITIONS_FILE,
+    load_clubs,
+    load_competitions,
+)
 
 
 @pytest.fixture
@@ -14,11 +19,19 @@ def client():
 
 @pytest.fixture(autouse=True)
 def donnees_reinitialisees():
-    """Recharge clubs.json et competitions.json avant chaque test.
+    """Recharge les donnees avant chaque test et restaure les fichiers apres.
 
     L'application garde ses donnees en memoire (variables globales) : sans ce
     rechargement, un achat effectue dans un test modifierait les suivants.
+    Les tests de persistance ecrivent dans les vrais fichiers JSON : on
+    sauvegarde donc leur contenu pour le restaurer en fin de test.
     """
+    fichiers = (CLUBS_FILE, COMPETITIONS_FILE)
+    contenus = {
+        chemin: chemin.read_text(encoding='utf-8') for chemin in fichiers
+    }
     server.clubs = load_clubs()
     server.competitions = load_competitions()
     yield
+    for chemin, contenu in contenus.items():
+        chemin.write_text(contenu, encoding='utf-8')

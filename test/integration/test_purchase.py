@@ -3,7 +3,9 @@
 import pytest
 
 import server
+from club import find_by_email
 from competition import find_by_name
+from repository import load_clubs, load_competitions
 
 DONNEES_VALIDES = {
     'club': 'Simply Lift',
@@ -174,3 +176,15 @@ def test_achat_de_deux_places_debute_deux_points(client):
     assert response.status_code == 200
     assert b'Points available: 11' in response.data
     assert b'You have booked 2 places.' in response.data
+
+
+def test_achat_persiste_les_points_et_le_stock(client):
+    response = client.post('/purchasePlaces', data=DONNEES_VALIDES)
+
+    assert response.status_code == 200
+
+    club = find_by_email(load_clubs(), 'john@simplylift.co')
+    competition = find_by_name(load_competitions(), 'Spring Festival')
+
+    assert club['points'] == 12
+    assert competition['numberOfPlaces'] == 24
