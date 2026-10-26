@@ -1,5 +1,6 @@
 from flask import Flask,render_template,request,redirect,flash,url_for
 
+from booking import parse_places
 from club import find_by_email, find_by_name as find_club_by_name
 from competition import find_by_name as find_competition_by_name
 from repository import load_clubs, load_competitions
@@ -36,12 +37,21 @@ def book(competition,club):
 
 @app.route('/purchasePlaces',methods=['POST'])
 def purchasePlaces():
-    competition = [c for c in competitions if c['name'] == request.form['competition']][0]
-    club = [c for c in clubs if c['name'] == request.form['club']][0]
-    placesRequired = int(request.form['places'])
-    competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
+    placesRequired = parse_places(request.form.get('places'))
+    foundCompetition = find_competition_by_name(
+        competitions, request.form.get('competition'))
+    foundClub = find_club_by_name(clubs, request.form.get('club'))
+
+    if placesRequired is None:
+        flash("Sorry, the number of places is invalid.")
+        return redirect(url_for('index'))
+    if foundClub is None or foundCompetition is None:
+        flash("Sorry, this club or competition does not exist.")
+        return redirect(url_for('index'))
+
+    foundCompetition['numberOfPlaces'] = int(foundCompetition['numberOfPlaces'])-placesRequired
     flash('Great-booking complete!')
-    return render_template('welcome.html', club=club, competitions=competitions)
+    return render_template('welcome.html', club=foundClub, competitions=competitions)
 
 
 # TODO: Add route for points display
