@@ -1,6 +1,6 @@
 from flask import Flask,render_template,request,redirect,flash,url_for
 
-from booking import parse_places, validate_purchase
+from booking import confirmation_message, parse_places, validate_purchase
 from club import find_by_email, find_by_name as find_club_by_name
 from competition import find_by_name as find_competition_by_name
 from repository import load_clubs, load_competitions
@@ -55,7 +55,8 @@ def purchasePlaces():
         return render_template('welcome.html', club=foundClub, competitions=competitions)
 
     foundCompetition['numberOfPlaces'] = int(foundCompetition['numberOfPlaces'])-placesRequired
-    flash('Great-booking complete!')
+    foundClub['points'] = int(foundClub['points'])-placesRequired
+    flash(confirmation_message(placesRequired))
     return render_template('welcome.html', club=foundClub, competitions=competitions)
 
 

@@ -119,3 +119,58 @@ def test_demande_de_12_places_acceptee(client):
     assert response.status_code == 200
     assert b'Great-booking complete!' in response.data
     assert b'Number of Places: 13' in response.data
+
+
+def test_solde_de_points_insuffisant_refuse(client):
+    data = {
+        'club': 'Iron Temple',
+        'competition': 'Spring Festival',
+        'places': '5',
+    }
+
+    response = client.post('/purchasePlaces', data=data)
+
+    assert response.status_code == 200
+    assert b'do not have enough points' in response.data
+    assert b'Number of Places: 25' in response.data
+    assert b'Points available: 4' in response.data
+
+
+def test_achat_debute_les_points_et_confirme_le_nombre(client):
+    data = {
+        'club': 'Iron Temple',
+        'competition': 'Spring Festival',
+        'places': '1',
+    }
+
+    response = client.post('/purchasePlaces', data=data)
+
+    assert response.status_code == 200
+    assert b'Points available: 3' in response.data
+    assert b'You have booked 1 place.' in response.data
+
+
+def test_concours_complet_refuse(client):
+    competition = find_by_name(server.competitions, 'Fall Classic')
+    competition['numberOfPlaces'] = '0'
+    data = {
+        'club': 'Simply Lift',
+        'competition': 'Fall Classic',
+        'places': '1',
+    }
+
+    response = client.post('/purchasePlaces', data=data)
+
+    assert response.status_code == 200
+    assert b'competition is full' in response.data
+    assert b'Points available: 13' in response.data
+
+
+def test_achat_de_deux_places_debute_deux_points(client):
+    data = dict(DONNEES_VALIDES, places='2')
+
+    response = client.post('/purchasePlaces', data=data)
+
+    assert response.status_code == 200
+    assert b'Points available: 11' in response.data
+    assert b'You have booked 2 places.' in response.data
